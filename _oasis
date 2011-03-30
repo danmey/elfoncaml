@@ -7,6 +7,6 @@ License:     LGPL
 Plugins:     META (0.2)
 
 Library elf
-  Path:       .
+  Path:       src
   BuildTools: ocamlbuild
-  
+  Modules: Elf

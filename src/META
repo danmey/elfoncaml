@@ -1,0 +1,9 @@
+# OASIS_START
+# DO NOT EDIT (digest: 4023c548645a7befbc8e00d0ce55d567)
+version = "0.0.0"
+description = "O'Caml libelf bindings"
+archive(byte) = "elf.cma"
+archive(native) = "elf.cmxa"
+exists_if = "elf.cma"
+# OASIS_STOP
+

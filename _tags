@@ -1,1 +1,5 @@
-<src>:	    include
+# OASIS_START
+# DO NOT EDIT (digest: 195268de9a2688c81c793bca833c8225)
+# Library elf
+"src": include
+# OASIS_STOP
