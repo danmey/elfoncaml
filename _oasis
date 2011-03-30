@@ -1,0 +1,12 @@
+OASISFormat: 0.2
+Name:        elfoncaml
+Version:     0.0.0
+Synopsis:    O'Caml libelf bindings
+Authors:     Wojciech Meyer
+License:     LGPL
+Plugins:     META (0.2)
+
+Library elf
+  Path:       .
+  BuildTools: ocamlbuild
+  
