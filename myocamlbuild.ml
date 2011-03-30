@@ -460,4 +460,6 @@ let package_default =
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
 (* OASIS_STOP *)
+flag ["link"; "ocaml"; "gcc"] (S[A"-g";A"-cc"; A"gcc -g"; A"-cclib"; A"-rdynamic"]);;
+dep ["link"; "ocaml"; "use_bindings"] ["src/bindings.o"];;
 Ocamlbuild_plugin.dispatch dispatch_default;;

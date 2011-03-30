@@ -1,1 +1,2 @@
-<*.*>:	gcc, pkg_threads, pkg_batteries, use_util
+<bindings.o>:  gcc
+<*.*>:  ocaml, use_bindings
