@@ -3,3 +3,4 @@
 # Library elf
 "src": include
 # OASIS_STOP
+"examples": include

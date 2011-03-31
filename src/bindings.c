@@ -27,16 +27,16 @@ static value alloc_elf(Elf* elf)
   return v;
 }
 
-CAMLprim value caml_elf_version (value version) {
+extern CAMLprim value caml_elf_version (value version) {
   CAMLparam1 (version); 
   CAMLreturn (Val_int (elf_version (Int_val (version))));
 }
-
-CAMLprim value caml_elf_begin (value fd, value cmd, value ref) {
-  CAMLparam3 (fd, cmd, ref); 
+extern CAMLprim value caml_elf_begin (value fd, value cmd/*, value ref*/) {
+  CAMLparam2 (fd, cmd /*,ref*/); 
   CAMLreturn (alloc_elf
               (elf_begin 
                (Int_val (fd),
                 Int_val (cmd),
-                Elf_val (ref))));
+                0)));
+  /*, Elf_val (ref)))); */
 }

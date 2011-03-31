@@ -1,0 +1,11 @@
+_log
+_build
+_junk
+*.native
+*.byte
+*.d.native
+*.p.byte
+TAGS
+setup.data
+setup.log
+src/prog4.c
