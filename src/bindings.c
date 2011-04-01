@@ -20,8 +20,7 @@ static struct custom_operations elf_ops = {
 /* Accessing the WINDOW * part of a Caml custom block */
 #define Elf_val(v) (*((Elf **) Data_custom_val(v)))
 
-static value alloc_elf(Elf* elf)
-{
+static value alloc_elf(Elf* elf) {
   value v = alloc_custom(&elf_ops, sizeof(Elf *), 0, 1);
   Elf_val(v) = elf;
   return v;
@@ -32,14 +31,16 @@ CAMLprim value caml_elf_version (value version) {
   CAMLreturn (Val_int (elf_version (Int_val (version))));
 }
 
-CAMLprim value caml_elf_begin (value fd, value cmd/*, value ref*/) {
-  CAMLparam2 (fd, cmd /*,ref*/); 
+CAMLprim value caml_elf_begin (value fd, value cmd, value ref) {
+  CAMLparam3 (fd, cmd, ref);
+  Elf* elf = 0;
+  if (Is_block (ref))           /* If it's Some elf then get Elf from it */
+    elf = Elf_val (Field (ref, 0));
   CAMLreturn (alloc_elf
               (elf_begin 
                (Int_val (fd),
                 Int_val (cmd),
-                0)));
-  /*, Elf_val (ref)))); */
+                elf)));
 }
 
 CAMLprim value caml_elf_kind (value elf) {

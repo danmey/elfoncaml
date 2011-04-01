@@ -7,7 +7,7 @@ let _ =
       | _ -> 
         begin 
           let fd = Unix.openfile Sys.argv.(1) [Unix.O_RDONLY] 0 in
-          let elf = Elf.begins fd Elf.C_READ in
+          let elf = Elf.begins fd Elf.C_READ None in
           let kind = 
             match Elf.kind elf with
               | Elf.K_NONE -> "none"

@@ -41,7 +41,6 @@ let (|>) x f = f x
 external elf_version : int -> int = "caml_elf_version"
 let version v = elf_version (int_of_ev v) |> ev_of_int
 
-external begins : Unix.file_descr -> elf_cmd -> elf = "caml_elf_begin"
+external begins : Unix.file_descr -> elf_cmd -> elf option -> elf = "caml_elf_begin"
 external kind : elf -> elf_type = "caml_elf_kind"
-
 
