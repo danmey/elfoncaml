@@ -6,6 +6,7 @@
 #include <caml/signals.h>
 #include <caml/config.h>
 #include <caml/custom.h>
+#include <caml/callback.h>
 #include <libelf.h>
 
 static struct custom_operations elf_ops = {
@@ -24,22 +25,23 @@ static value * elf_error_exn = NULL;
 
 static void elf_error (char *cmdname) {
   value res;
-  value name = Val_unit, err = Val_unit, arg = Val_unit;
+  value name = Val_unit, err = Val_unit;
 
   Begin_roots2 (name, err);
-    name = copy_string (cmdname);
+    /* name = copy_string (cmdname); */
     err = copy_string (elf_errmsg (-1));
-    if (elf_error_exn == NULL) {
-      elf_error_exn = caml_named_value("Elf.Elf_error");
-      if (elf_error_exn == NULL)
-        invalid_argument("Exception Elf.Elf_error not initialized, please link elf.cma");
-    }
-    res = alloc_small(3, 0);
-    Field(res, 0) = *elf_error_exn;
-    Field(res, 1) = name;
-    Field(res, 2) = err;
+    /* if (elf_error_exn == NULL) { */
+    /*   elf_error_exn = caml_named_value("Elf.Elf_error"); */
+    /*   if (elf_error_exn == NULL) */
+    /*     invalid_argument("Exception Elf.Elf_error not initialized, please link elf.cma"); */
+    /* } */
+    /* res = alloc_small(3, 0); */
+    /* Field(res, 0) = *elf_error_exn; */
+    /* Field(res, 1) = name; */
+    /* Field(res, 2) = err; */
+    failwith(err);
   End_roots();
-  mlraise(res);
+  //  mlraise(res);
 }
 
 static value alloc_elf(Elf* elf) {

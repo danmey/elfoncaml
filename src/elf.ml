@@ -1,4 +1,3 @@
-exception Elf_error of string * string
 type ev = [ 
   `NONE
 | `CURRENT
@@ -45,3 +44,4 @@ let version v = elf_version (int_of_ev v) |> ev_of_int
 external begins : Unix.file_descr -> elf_cmd -> elf option -> elf = "caml_elf_begin"
 external kind : elf -> elf_type = "caml_elf_kind"
 
+exception Elf_error of string * string
