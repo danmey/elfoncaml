@@ -20,6 +20,28 @@ static struct custom_operations elf_ops = {
 /* Accessing the WINDOW * part of a Caml custom block */
 #define Elf_val(v) (*((Elf **) Data_custom_val(v)))
 
+static value * elf_error_exn = NULL;
+
+static void elf_error (char *cmdname) {
+  value res;
+  value name = Val_unit, err = Val_unit, arg = Val_unit;
+
+  Begin_roots2 (name, err);
+    name = copy_string (cmdname);
+    err = copy_string (elf_errmsg (-1));
+    if (elf_error_exn == NULL) {
+      elf_error_exn = caml_named_value("Elf.Elf_error");
+      if (elf_error_exn == NULL)
+        invalid_argument("Exception Elf.Elf_error not initialized, please link elf.cma");
+    }
+    res = alloc_small(3, 0);
+    Field(res, 0) = *elf_error_exn;
+    Field(res, 1) = name;
+    Field(res, 2) = err;
+  End_roots();
+  mlraise(res);
+}
+
 static value alloc_elf(Elf* elf) {
   value v = alloc_custom(&elf_ops, sizeof(Elf *), 0, 1);
   Elf_val(v) = elf;
@@ -34,13 +56,12 @@ CAMLprim value caml_elf_version (value version) {
 CAMLprim value caml_elf_begin (value fd, value cmd, value ref) {
   CAMLparam3 (fd, cmd, ref);
   Elf* elf = 0;
-  if (Is_block (ref))           /* If it's Some elf then get Elf from it */
+  if (Is_block (ref))           /* If it's Some elf then get Elf* from it */
     elf = Elf_val (Field (ref, 0));
-  CAMLreturn (alloc_elf
-              (elf_begin 
-               (Int_val (fd),
-                Int_val (cmd),
-                elf)));
+  elf = elf_begin (Int_val (fd), Int_val (cmd), elf);
+  if (elf == 0)
+    elf_error ("elf_begin");
+  CAMLreturn (alloc_elf (elf));
 }
 
 CAMLprim value caml_elf_kind (value elf) {

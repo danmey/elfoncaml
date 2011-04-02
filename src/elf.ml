@@ -1,3 +1,4 @@
+exception Elf_error of string * string
 type ev = [ 
   `NONE
 | `CURRENT
