@@ -71,6 +71,12 @@ static value alloc_elf32_ehdr(Elf32_Ehdr* s) {
   return v;
 }
 
+static value alloc_elf32_phdr(Elf32_Phdr* s) {
+  value v = alloc_custom(&elf_ops, sizeof(Elf32_Phdr *), 0, 1);
+  Elf32_Phdr_val(v) = s;
+  return v;
+}
+
 CAMLprim value caml_elf_version (value version) {
   CAMLparam1 (version); 
   CAMLreturn (Val_int (elf_version (Int_val (version))));
@@ -299,18 +305,18 @@ static unsigned int variant_to_enum (value hash)
   return 0;
 }
 
-static value enum_to_variant (unsigned int en)
-{
-  int i=0;
-  init_polvariants ();
-  for (i=0; 
-       i < sizeof(variants) / sizeof(variants[0]); 
-       i++)
-    if (variants[i].constant == en)
-      return variants[i].hash;
-  failwith ("enum_to_variant: Wrong enum.");
-  return 0;
-}
+/* static value enum_to_variant (unsigned int en) */
+/* { */
+/*   int i=0; */
+/*   init_polvariants (); */
+/*   for (i=0;  */
+/*        i < sizeof(variants) / sizeof(variants[0]);  */
+/*        i++) */
+/*     if (variants[i].constant == en) */
+/*       return variants[i].hash; */
+/*   failwith ("enum_to_variant: Wrong enum."); */
+/*   return 0; */
+/* } */
 
 static int et_tab[] = 
 {
@@ -406,7 +412,52 @@ static int pt_tab[] =
   0x7fffffff
 };
 
+int pt_to_int(int v)
+{
+  int i;
+  for (i=0; i < sizeof(pt_tab)/sizeof(pt_tab[0]); i++)
+    if (pt_tab[i] == v)
+      return i;
+  failwith ("pt_to_int: Wrong enum.");
+  return 0;
+}
+
   
 CAMLprim value caml_elf_ph (value elf)
 {
+  CAMLparam1 (elf);
+  Elf32_Phdr* v = elf32_newphdr (Elf_val (elf), 1);
+  if (!v) elf_error ("elf32_newphdr");
+  CAMLreturn (alloc_elf32_phdr (v));
 }
+
+CAMLprim value caml_elf_ph_put (value elf_header, value phdr)
+{
+  CAMLparam2 (phdr, phdr);
+  Elf32_Phdr* hdr = Elf32_Phdr_val (phdr);
+  hdr->p_type  = pt_tab[Val_int (Field (elf_header, 0))];
+  hdr->p_offset = Int64_val (Field (elf_header, 1));
+  hdr->p_vaddr  = Int64_val (Field (elf_header, 2));
+  hdr->p_paddr  = Int64_val (Field (elf_header, 3));
+  hdr->p_filesz = Int_val (Field (elf_header, 4));
+  hdr->p_memsz  = Int_val (Field (elf_header, 5));
+  hdr->p_flags  = Int_val (Field (elf_header, 6));
+  hdr->p_align  = Int_val (Field (elf_header, 7));
+  CAMLreturn (Val_unit);
+}
+
+CAMLprim value caml_elf_ph_get_internal (value phdr, value elf_phdr)
+{
+  CAMLparam2 (phdr, elf_phdr);
+  Elf32_Phdr* hdr = Elf32_Phdr_val (phdr);
+  Field (elf_phdr, 0) = Val_int (pt_to_int (hdr->p_type));
+  Field (elf_phdr, 1) = copy_int64 (hdr->p_offset);
+  Field (elf_phdr, 2) = copy_int64 (hdr->p_vaddr);
+  Field (elf_phdr, 3) = copy_int64 (hdr->p_paddr);
+  Field (elf_phdr, 4) = Val_int (hdr->p_filesz);
+  Field (elf_phdr, 5) = Val_int (hdr->p_memsz);
+  Field (elf_phdr, 6) = Val_int (hdr->p_flags);
+  Field (elf_phdr, 7) = Val_int (hdr->p_align);
+  CAMLreturn (Val_unit);
+}
+
