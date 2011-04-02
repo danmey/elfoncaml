@@ -286,10 +286,12 @@ struct {
 
 static void init_polvariants () {
   int i;
-  for (i=0; variants[0].hash == 0 
-         && i < sizeof(variants) / sizeof(variants[0]); 
-       i++)
-    variants[i].hash = hash_variant (variants[i].name);
+  if (variants[0].hash == 0)
+    {
+      for (i=0; i < sizeof(variants) / sizeof(variants[0]); 
+           i++)
+        variants[i].hash = hash_variant (variants[i].name);
+    }
 }
 
 static unsigned int variant_to_enum (value hash)
@@ -298,25 +300,26 @@ static unsigned int variant_to_enum (value hash)
   init_polvariants ();
   for (i=0; 
        i < sizeof(variants) / sizeof(variants[0]); 
-       i++)
-    if (variants[i].hash == hash)
-      return variants[i].constant;
+       i++) {
+        if (variants[i].hash == hash)
+          return variants[i].constant;
+  }
   failwith ("variant_to_enum: Wrong variant.");
   return 0;
 }
 
-/* static value enum_to_variant (unsigned int en) */
-/* { */
-/*   int i=0; */
-/*   init_polvariants (); */
-/*   for (i=0;  */
-/*        i < sizeof(variants) / sizeof(variants[0]);  */
-/*        i++) */
-/*     if (variants[i].constant == en) */
-/*       return variants[i].hash; */
-/*   failwith ("enum_to_variant: Wrong enum."); */
-/*   return 0; */
-/* } */
+static value enum_to_variant (unsigned int en)
+{
+  int i=0;
+  init_polvariants ();
+  for (i=0;
+       i < sizeof(variants) / sizeof(variants[0]);
+       i++)
+    if (variants[i].constant == en)
+      return variants[i].hash;
+  failwith ("enum_to_variant: Wrong enum.");
+  return 0;
+}
 
 static int et_tab[] = 
 {
@@ -368,7 +371,7 @@ CAMLprim value caml_elf_elf32_put (value elf_header, value efhdr)
   hdr->e_phnum     = Int_val (Field (elf_header, 10));
   hdr->e_shentsize = Int64_val (Field (elf_header, 11));
   hdr->e_shnum     = Int_val (Field (elf_header, 12));
-  hdr->e_shstrndx  = Int_val (Field (elf_header, 12));
+  hdr->e_shstrndx  = Int_val (Field (elf_header, 13));
   CAMLreturn (Val_unit);
 }
 
@@ -378,17 +381,17 @@ CAMLprim value caml_elf_elf32_get_internal (value efhdr, value elf_header)
   CAMLlocal1 (e_ident);
   Elf32_Ehdr* hdr = Elf32_Ehdr_val (efhdr);
   e_ident = caml_alloc_small(8, 0);
-  Field (e_ident, 0) = Int_val (hdr->e_ident[0]);
-  Field (e_ident, 1) = Int_val (hdr->e_ident[1]);
-  Field (e_ident, 2) = Int_val (hdr->e_ident[2]);
-  Field (e_ident, 3) = Int_val (hdr->e_ident[3]);
-  Field (e_ident, 4) = Int_val (hdr->e_ident[4]);
-  Field (e_ident, 5) = Int_val (hdr->e_ident[5]);
-  Field (e_ident, 6) = Int_val (hdr->e_ident[6]);
-  Field (e_ident, 7) = Int_val (hdr->e_ident[7]);
+  Field (e_ident, 0) = Val_int (hdr->e_ident[0]);
+  Field (e_ident, 1) = Val_int (hdr->e_ident[1]);
+  Field (e_ident, 2) = Val_int (hdr->e_ident[2]);
+  Field (e_ident, 3) = Val_int (hdr->e_ident[3]);
+  Field (e_ident, 4) = Val_int (hdr->e_ident[4]);
+  Field (e_ident, 5) = Val_int (hdr->e_ident[5]);
+  Field (e_ident, 6) = Val_int (hdr->e_ident[6]);
+  Field (e_ident, 7) = Val_int (hdr->e_ident[7]);
   Field (elf_header, 0) = e_ident;
   Field (elf_header, 1) = Val_int (et_to_int (hdr->e_type));
-  Field (elf_header, 2) = variant_to_enum  (hdr->e_machine);
+  Field (elf_header, 2) = enum_to_variant (hdr->e_machine);
   Field (elf_header, 3) = Val_int (hdr->e_version);
   Field (elf_header, 4) = copy_int64 (hdr->e_entry);
   Field (elf_header, 5) = copy_int64 (hdr->e_phoff);
@@ -399,7 +402,7 @@ CAMLprim value caml_elf_elf32_get_internal (value efhdr, value elf_header)
   Field (elf_header, 10) = Val_int (hdr->e_phnum);
   Field (elf_header, 11) = copy_int64 (hdr->e_shentsize);
   Field (elf_header, 12) = Val_int (hdr->e_shnum);
-  Field (elf_header, 12) = Val_int (hdr->e_shstrndx);
+  Field (elf_header, 13) = Val_int (hdr->e_shstrndx);
   CAMLreturn (Val_unit);
 }
 

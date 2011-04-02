@@ -11,6 +11,8 @@ let _ =
           let kind = Elf.kind elf in
           match kind with
             | Elf.K_ELF ->
+              let ehdr = Elf.Elf32Header.get (Elf.elf32_header elf) in
+              print_endline (Elf.Elf32Header.to_string ehdr);
               let str_section = Elf.str_section elf in
               let sections = Elf.sections elf in
               List.iter 
