@@ -33,7 +33,8 @@ type elf_type =
   | K_NUM
 
 type elf
-
+type str_sec
+type section
 let (-|) f g x = f (g x)
 let (<|) f x = f x
 let (|>) x f = f x
@@ -43,5 +44,7 @@ let version v = elf_version (int_of_ev v) |> ev_of_int
 
 external begins : Unix.file_descr -> elf_cmd -> elf option -> elf = "caml_elf_begin"
 external kind : elf -> elf_type = "caml_elf_kind"
+external str_section : elf -> str_sec = "caml_elf_str_section"
+external sections : elf -> section list = "caml_elf_sections"
 
 exception Elf_error of string * string

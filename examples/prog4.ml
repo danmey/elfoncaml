@@ -7,15 +7,11 @@ let _ =
       | _ -> 
         begin 
           let fd = Unix.openfile Sys.argv.(1) [Unix.O_RDONLY] 0 in
-          Unix.close fd;
           let elf = Elf.begins fd Elf.C_READ None in
-          let kind = 
-            match Elf.kind elf with
-              | Elf.K_NONE -> "none"
-              | Elf.K_AR -> "ar"
-              | Elf.K_COFF -> "coff"
-              | Elf.K_ELF -> "elf"
-              | Elf.K_NUM -> "num" in
-          print_endline kind
+          let kind = Elf.kind elf in
+          let ss = Elf.str_section elf in
+          let sections = Elf.sections elf in
+          Printf.printf "Number of sections: %d\n" (List.length sections)
         end
+
             
