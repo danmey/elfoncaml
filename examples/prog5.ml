@@ -6,8 +6,8 @@ let _ =
       | `NONE -> print_endline "ELF library initialization failed"
       | _ -> 
         begin 
-          let fd = Unix.openfile Sys.argv.(1) [Unix.O_RDONLY] 0 in
-          let elf = Elf.begins fd Elf.C_READ None in
+          let fd = Unix.openfile Sys.argv.(1) [Unix.O_WDONLY;Unix.O_CREAT;] 0777 in
+          let elf = Elf.begins fd Elf.C_WRITE None in
           let kind = Elf.kind elf in
           match kind with
             | Elf.K_ELF ->
@@ -26,5 +26,3 @@ let _ =
               done
             | _ -> failwith (Printf.sprintf "%s is not an ELF object." Sys.argv.(1))
         end
-
-            
