@@ -7,8 +7,10 @@
 #include <caml/config.h>
 #include <caml/custom.h>
 #include <caml/callback.h>
+#include <caml/bigarray.h>
 #include <libelf.h>
 #include <gelf.h>
+#include <string.h>
 
 static struct custom_operations elf_ops = {
   "org.danmey",
@@ -24,7 +26,7 @@ static struct custom_operations elf_ops = {
 #define Elf_Scn_val(v) (*((Elf_Scn **) Data_custom_val(v)))
 #define GElf_Shdr_val(v) (*((GElf_Shdr **) Data_custom_val(v)))
 
-static value * elf_error_exn = NULL;
+//static value * elf_error_exn = NULL;
 
 static void elf_error (char *cmdname) {
   //value res;
@@ -87,7 +89,8 @@ CAMLprim value caml_elf_str_section (value e)
   size_t shstrndx;
   if (elf_getshdrstrndx (elf, &shstrndx) != 0)
     elf_error ("elf_getshdrstrndx");
-  CAMLreturn (Val_int (shstrndx));
+  Elf_Scn* scn = elf_getscn (elf, shstrndx);
+  CAMLreturn (alloc_elf_scn (scn));
 }
 
 CAMLprim value caml_elf_sections (value e)
@@ -107,22 +110,59 @@ CAMLprim value caml_elf_sections (value e)
     if (scn != 0) {
       Field(node, 1) = caml_alloc_small(2, 0);
       node = Field(node, 1);
-    } else
-      {
+    } else {
         Field(node, 1) = Val_int (0);
       }
   }
   CAMLreturn (list);
 }
 
-CAMLprim value caml_elf_section_name (value elf, value section, value str_sec)
+CAMLprim value caml_elf_section_name (value elf, value section, value str_section)
 {
-  CAMLparam3 (elf, section, str_sec);
+  CAMLparam3 (elf, section, str_section);
   GElf_Shdr shdr;
   if ( gelf_getshdr (Elf_Scn_val (section), &shdr) != &shdr)
     elf_error ("gelf_getshdr");
-  char* name = elf_strptr (Elf_val (elf), Int_val (str_sec), shdr.sh_name);
+  char* name = elf_strptr 
+    (Elf_val (elf), 
+     elf_ndxscn (Elf_Scn_val (str_section)), 
+     shdr.sh_name);
   if (!name)
     elf_error ("gelf_strptr");
   CAMLreturn (copy_string (name));
 }
+
+CAMLprim value caml_elf_section_index (value section)
+{
+  CAMLparam1 (section);
+  CAMLreturn (Val_int (elf_ndxscn (Elf_Scn_val (section))));
+}
+
+CAMLprim value caml_elf_section_size (value section)
+{
+  CAMLparam1 (section);
+  GElf_Shdr shdr;
+  if ( gelf_getshdr (Elf_Scn_val (section), &shdr) != &shdr)
+    elf_error ("gelf_getshdr");
+  CAMLreturn (Val_int (shdr.sh_size));
+}
+
+
+CAMLprim value caml_elf_section_data_fill (value section, value bigarray)
+{
+  CAMLparam2 (section, bigarray);
+  Elf_Data* data = NULL; int n = 0;
+  GElf_Shdr shdr;
+  char* buffer = (char*)Data_bigarray_val(bigarray);
+  if (gelf_getshdr(Elf_Scn_val (section), &shdr) != &shdr)
+    elf_error ("gelf_getshdr");
+  while (n < shdr.sh_size &&
+         (data = elf_getdata (Elf_Scn_val (section), 
+                              data)) != NULL) {
+    char* p = (char *) data->d_buf;
+    memcpy (buffer + n, p, data->d_size); 
+    n += data->d_size;
+  }
+  CAMLreturn (Val_unit);
+}
+

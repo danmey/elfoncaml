@@ -4,5 +4,5 @@
 "src": include
 # OASIS_STOP
 "examples": include
-<examples/prog4.byte>:	use_elf, use_unix
-<examples/prog4.native>:	use_elf, use_unix
+<examples/prog4.byte>:	use_elf, use_unix, use_bigarray
+<examples/prog4.native>:	use_elf, use_unix, use_bigarray
