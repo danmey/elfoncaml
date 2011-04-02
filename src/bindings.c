@@ -8,6 +8,7 @@
 #include <caml/custom.h>
 #include <caml/callback.h>
 #include <libelf.h>
+#include <gelf.h>
 
 static struct custom_operations elf_ops = {
   "org.danmey",
@@ -21,6 +22,7 @@ static struct custom_operations elf_ops = {
 /* Accessing the WINDOW * part of a Caml custom block */
 #define Elf_val(v) (*((Elf **) Data_custom_val(v)))
 #define Elf_Scn_val(v) (*((Elf_Scn **) Data_custom_val(v)))
+#define GElf_Shdr_val(v) (*((GElf_Shdr **) Data_custom_val(v)))
 
 static value * elf_error_exn = NULL;
 
@@ -46,7 +48,7 @@ static void elf_error (char *cmdname) {
 }
 
 static value alloc_elf(Elf* elf) {
-  value v = alloc_custom(&elf_ops, sizeof(Elf*), 0, 1);
+  value v = alloc_custom(&elf_ops, sizeof(Elf *), 0, 1);
   Elf_val(v) = elf;
   return v;
 }
@@ -111,4 +113,16 @@ CAMLprim value caml_elf_sections (value e)
       }
   }
   CAMLreturn (list);
+}
+
+CAMLprim value caml_elf_section_name (value elf, value section, value str_sec)
+{
+  CAMLparam3 (elf, section, str_sec);
+  GElf_Shdr shdr;
+  if ( gelf_getshdr (Elf_Scn_val (section), &shdr) != &shdr)
+    elf_error ("gelf_getshdr");
+  char* name = elf_strptr (Elf_val (elf), Int_val (str_sec), shdr.sh_name);
+  if (!name)
+    elf_error ("gelf_strptr");
+  CAMLreturn (copy_string (name));
 }

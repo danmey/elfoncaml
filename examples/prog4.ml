@@ -11,7 +11,8 @@ let _ =
           let kind = Elf.kind elf in
           let ss = Elf.str_section elf in
           let sections = Elf.sections elf in
-          Printf.printf "Number of sections: %d\n" (List.length sections)
+          List.iter 
+            (fun sec -> print_endline (Elf.section_name elf sec ss)) sections
         end
 
             

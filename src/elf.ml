@@ -35,6 +35,8 @@ type elf_type =
 type elf
 type str_sec
 type section
+type index
+
 let (-|) f g x = f (g x)
 let (<|) f x = f x
 let (|>) x f = f x
@@ -46,5 +48,6 @@ external begins : Unix.file_descr -> elf_cmd -> elf option -> elf = "caml_elf_be
 external kind : elf -> elf_type = "caml_elf_kind"
 external str_section : elf -> str_sec = "caml_elf_str_section"
 external sections : elf -> section list = "caml_elf_sections"
+external section_name : elf -> section -> str_sec -> string = "caml_elf_section_name"
 
 exception Elf_error of string * string
