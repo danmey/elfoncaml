@@ -25,12 +25,27 @@ type elf_cmd =
   | C_RDWR
   | C_NUM
 
-type elf_type =
+type elf_kind =
   | K_NONE
   | K_AR
   | K_COFF
   | K_ELF
   | K_NUM
+
+
+type elf_ei =
+    EI_MAG0
+  | EI_MAG1
+  | EI_MAG2
+  | EI_MAG3
+  | EI_CLASS
+  | EI_DATA
+  | EI_VERSION
+  | EI_OSABI
+  | EI_ABIVERSION
+  | EI_PAD
+
+let offset_of_ei : elf_ei -> int = Obj.magic
 
 type machine =
   [ `M32 (* AT&T WE 32100 *)
@@ -132,7 +147,7 @@ type str_sec
 type section
 type section_data = (int, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
 type elf32_ehdr
-
+type elf32_phdr
 module SectionData = Bigarray.Array1
 
 let (-|) f g x = f (g x)
@@ -143,7 +158,7 @@ external elf_version : int -> int = "caml_elf_version"
 let version v = elf_version (int_of_ev v) |> ev_of_int
 
 external begins : Unix.file_descr -> elf_cmd -> elf option -> elf = "caml_elf_begin"
-external kind : elf -> elf_type = "caml_elf_kind"
+external kind : elf -> elf_kind = "caml_elf_kind"
 external str_section : elf -> section = "caml_elf_str_section"
 external sections : elf -> section list = "caml_elf_sections"
 external section_name : elf -> section -> section -> string = "caml_elf_section_name"
@@ -152,6 +167,7 @@ external section_size : section -> int = "caml_elf_section_size"
 external section_data_fill : section -> section_data -> unit
   = "caml_elf_section_data_fill"
 external elf32_header : elf -> elf32_ehdr = "caml_elf_elf32_header"
+external program_header : elf -> elf32_phdr = "caml_elf_ph"
 
 let section_data section =
   let size = section_size section in
@@ -164,7 +180,7 @@ type offset = Int64.t
 type size = Int64.t
 
 type elf_header = { 
-  e_ident     : string;
+  e_ident     : elf_ident;
   e_type      : elf_type;
   e_machine   : machine;
   e_version   : version;
@@ -179,25 +195,109 @@ type elf_header = {
   e_shnum     : int;
   e_shstrndx  : int;
 }
+and elf_ident = {
+  mag0 : char;
+  mag1 : char;
+  mag2 : char;
+  mag3 : char;
+  eclass: elf_class;
+  data: elf_data;
+  osabi: elf_osabi;
+  abiversion: int;
+}
+and elf_data =
+  | ELFDATANONE
+  | ELFDATA2LSB
+  | ELFDATA2MSB
+  | ELFDATANUM
+and elf_class =
+  | ELFCLASSNONE
+  | ELFCLASS32
+  | ELFCLASS64
+  | ELFCLASSNUM
+and elf_osabi =
+  | ELFOSABI_NONE
+  | ELFOSABI_SYSV
+  | ELFOSABI_HPUX
+  | ELFOSABI_NETBSD
+  | ELFOSABI_LINUX
+  | ELFOSABI_SOLARIS
+  | ELFOSABI_AIX
+  | ELFOSABI_IRIX
+  | ELFOSABI_FREEBSD
+  | ELFOSABI_TRU64
+  | ELFOSABI_MODESTO
+  | ELFOSABI_OPENBSD
+  | ELFOSABI_OPENVMS
+  | ELFOSABI_NSK
+  | ELFOSABI_AROS
+  | ELFOSABI_ARM
+  | ELFOSABI_STANDALONE
+and elf_type =
+  | ET_NONE
+  | ET_REL
+  | ET_EXEC
+  | ET_DYN
+  | ET_CORE
+  | ET_NUM
+  | ET_LOOS
+  | ET_HIOS
+  | ET_LOPROC
+  | ET_HIPROC
 
+and phdr = {
+  p_type : pt;
+  p_offset : offset;
+  p_vaddr : ptr;
+  p_paddr : ptr;
+  p_filesz : int;
+  p_memsz : int;
+  p_flags : int;
+  p_align : int;
+}
+and pt =
+  | PT_NULL
+  | PT_LOAD
+  | PT_DYNAMIC
+  | PT_INTERP
+  | PT_NOTE
+  | PT_SHLIB
+  | PT_PHDR
+  | PT_TLS
+  | PT_NUM
+  | PT_LOOS
+  | PT_HIOS
+  | PT_LOPROC
+  | PT_HIPROC
+
+
+let ei_nident = 16
 module type HEADER = sig
-  type t
+  type t = elf_header
   type native_t
-  val create : elf -> native_t
+  val create : elf -> t
   val put : t -> native_t -> unit
   val get : native_t -> t
+  (* val to_string : t -> string *)
 end
 
 module Elf32Header : HEADER = struct
   type t = elf_header
   type native_t = elf32_ehdr
-  let create = elf32_header
   external put : t -> native_t -> unit = "caml_elf_elf32_put"
   external get_internal : native_t -> t -> unit = "caml_elf_elf32_get_internal"
   let get nt =
     let default = { 
-      e_ident     = "";
-      e_type      = K_NONE;
+      e_ident = 
+        { mag0 = char_of_int 0x7f; 
+          mag1 = 'E'; 
+          mag2 = 'L'; 
+          mag3 = 'F';
+          eclass = ELFCLASS32;
+          data = ELFDATA2MSB;
+          osabi = ELFOSABI_LINUX;
+          abiversion = 0; };
+      e_type      = ET_NONE;
       e_machine   = `I386;
       e_version   = EV_NONE;
       e_entry     = 0L;
@@ -213,6 +313,30 @@ module Elf32Header : HEADER = struct
     in
     get_internal nt default;
     default
+  let create elf = get (elf32_header elf)
 end
-    
+
+module ProgramHeader = struct
+  type t = phdr
+  type native_t = elf32_phdr
+  external put : t -> native_t -> unit = "caml_elf_ph_put"
+  external get_internal : native_t -> t -> unit = "caml_elf_ph_get_internal"
+  let get nt =
+    let default = { 
+      p_type = PT_NULL;
+      p_offset = 0L;
+      p_vaddr = 0L;
+      p_paddr = 0L;
+      p_filesz = 0;
+      p_memsz = 0;
+      p_flags = 0;
+      p_align = 0;
+    }
+    in
+    get_internal nt default;
+    default
+  let create elf = get (program_header elf)
+end
+
+
 exception Elf_error of string * string

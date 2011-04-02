@@ -6,3 +6,5 @@
 "examples": include
 <examples/prog4.byte>:	use_elf, use_unix, use_bigarray
 <examples/prog4.native>:	use_elf, use_unix, use_bigarray
+<examples/prog5.byte>:	use_elf, use_unix, use_bigarray
+<examples/prog5.native>:	use_elf, use_unix, use_bigarray

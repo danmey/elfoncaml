@@ -312,12 +312,45 @@ static value enum_to_variant (unsigned int en)
   return 0;
 }
 
+static int et_tab[] = 
+{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  0xfe00,
+  0xfeff,
+  0xff00,
+  0xffff
+};
+
+int et_to_int(int v)
+{
+  int i;
+  for (i=0; i < sizeof(et_tab)/sizeof(et_tab[0]); i++)
+    if (et_tab[i] == v)
+      return i;
+  failwith ("et_to_int: Wrong enum.");
+  return 0;
+}
+
 CAMLprim value caml_elf_elf32_put (value elf_header, value efhdr)
 {
   CAMLparam2 (elf_header, efhdr);
+  CAMLlocal1 (e_ident);
   Elf32_Ehdr* hdr = Elf32_Ehdr_val (efhdr);
-  strcpy(hdr->e_ident, String_val (Field (elf_header, 0)));
-  hdr->e_type      = Int_val (Field (elf_header, 1));
+  e_ident = Field (elf_header, 0);
+  hdr->e_ident[0] = Int_val (Field (e_ident, 0));
+  hdr->e_ident[1] = Int_val (Field (e_ident, 1));
+  hdr->e_ident[2] = Int_val (Field (e_ident, 2));
+  hdr->e_ident[3] = Int_val (Field (e_ident, 3));
+  hdr->e_ident[4] = Int_val (Field (e_ident, 4));
+  hdr->e_ident[5] = Int_val (Field (e_ident, 5));
+  hdr->e_ident[6] = Int_val (Field (e_ident, 6));
+  hdr->e_ident[7] = Int_val (Field (e_ident, 7));
+  hdr->e_type      = et_tab[Int_val (Field (elf_header, 1))];
   hdr->e_machine   = variant_to_enum  (Field (elf_header, 2));
   hdr->e_version   = Int_val (Field (elf_header, 3));
   hdr->e_entry     = Int64_val (Field (elf_header, 4));
@@ -333,12 +366,22 @@ CAMLprim value caml_elf_elf32_put (value elf_header, value efhdr)
   CAMLreturn (Val_unit);
 }
 
-CAMLprim value caml_elf_elf32_get_internal (value elf_header, value efhdr)
+CAMLprim value caml_elf_elf32_get_internal (value efhdr, value elf_header)
 {
-  CAMLparam2 (elf_header, efhdr);
+  CAMLparam2 (efhdr, elf_header);
+  CAMLlocal1 (e_ident);
   Elf32_Ehdr* hdr = Elf32_Ehdr_val (efhdr);
-  strcpy(hdr->e_ident, copy_string (Field (elf_header, 0)));
-  Field (elf_header, 1) = Val_int (hdr->e_type);
+  e_ident = caml_alloc_small(8, 0);
+  Field (e_ident, 0) = Int_val (hdr->e_ident[0]);
+  Field (e_ident, 1) = Int_val (hdr->e_ident[1]);
+  Field (e_ident, 2) = Int_val (hdr->e_ident[2]);
+  Field (e_ident, 3) = Int_val (hdr->e_ident[3]);
+  Field (e_ident, 4) = Int_val (hdr->e_ident[4]);
+  Field (e_ident, 5) = Int_val (hdr->e_ident[5]);
+  Field (e_ident, 6) = Int_val (hdr->e_ident[6]);
+  Field (e_ident, 7) = Int_val (hdr->e_ident[7]);
+  Field (elf_header, 0) = e_ident;
+  Field (elf_header, 1) = Val_int (et_to_int (hdr->e_type));
   Field (elf_header, 2) = variant_to_enum  (hdr->e_machine);
   Field (elf_header, 3) = Val_int (hdr->e_version);
   Field (elf_header, 4) = copy_int64 (hdr->e_entry);
@@ -352,4 +395,18 @@ CAMLprim value caml_elf_elf32_get_internal (value elf_header, value efhdr)
   Field (elf_header, 12) = Val_int (hdr->e_shnum);
   Field (elf_header, 12) = Val_int (hdr->e_shstrndx);
   CAMLreturn (Val_unit);
+}
+
+static int pt_tab[] = 
+{
+  0,1,2,3,4,5,6,7,8,
+  0x60000000,
+  0x6fffffff,
+  0x70000000,
+  0x7fffffff
+};
+
+  
+CAMLprim value caml_elf_ph (value elf)
+{
 }
