@@ -1,3 +1,4 @@
+
 let _ =
   if Array.length Sys.argv != 2 then
     Printf.printf "usage: %s <file-name>\n" Sys.argv.(0)
@@ -10,18 +11,26 @@ let _ =
               let fd = Unix.openfile Sys.argv.(1) [Unix.O_WRONLY;Unix.O_CREAT;] 0777 in
               let elf = begins fd C_WRITE None in
               let ehdr = Elf32Header.create elf in
-              let ehdr =
-                { ehdr with
-                  e_ident =
-                    { ehdr.e_ident with adata = Elf.ELFDATA2MSB };
-                  e_machine = `PPC;
-                  e_type = ET_EXEC; }
-              in
-              Elf32Header.update ehdr;
+              Elf32Header.update { ehdr with
+                e_ident =
+                  { ehdr.e_ident with adata = Elf.ELFDATA2MSB };
+                e_machine = `PPC;
+                e_type = ET_EXEC; };
               let phdr = ProgramHeader.create elf in
               let scn = create_section elf in
               let data = SectionData.create scn in
-              SectionData.update data;
+              SectionData.update { data with 
+                d_align = 4L;
+                d_off = 0L;
+                d_buf = Some (Bigarray.Array1.of_array Bigarray.int32 Bigarray.c_layout [|0x01234567l;0x89abcdefl;0xdeadc0del|]);
+                d_type = T_WORD;
+                d_size = 12L;
+                d_version = EV_CURRENT;
+              };
+              let shdr = SectionHeader.from_section scn in
+              SectionHeader.update { shdr with
+                sh_name = 1l; };
+
               
           ()
           (* match kind with *)

@@ -514,9 +514,9 @@ CAMLprim value caml_elf_elf32_getshdr (value section)
   CAMLreturn (alloc_elf32_shdr (shdr));
 }
   
-CAMLprim value caml_elf_sh_put (value elf_shdr, value shdr)
+CAMLprim value caml_elf_sh_put (value shdr, value elf_shdr)
 {
-  CAMLparam2 (elf_shdr, shdr);
+  CAMLparam2 (shdr, elf_shdr);
   Elf32_Shdr* hdr = Elf32_Shdr_val (shdr);
   hdr->sh_name      = Int32_val (Field (elf_shdr, 0));
   hdr->sh_type      = Int32_val (Field (elf_shdr, 1));
@@ -531,10 +531,12 @@ CAMLprim value caml_elf_sh_put (value elf_shdr, value shdr)
   CAMLreturn (Val_unit);
 }
 
-CAMLprim value caml_elf_sh_get_internal (value shdr, value elf_shdr)
+CAMLprim value caml_elf_sh_get (value shdr)
 {
-  CAMLparam2 (shdr, elf_shdr);
+  CAMLparam1 (shdr);
+  CAMLlocal1 (elf_shdr);
   Elf32_Shdr* hdr = Elf32_Shdr_val (shdr);
+  elf_shdr  = caml_alloc_small(11, 0);
   Field (elf_shdr, 0) = copy_int32 (hdr->sh_name);
   Field (elf_shdr, 1) = copy_int32 (hdr->sh_type);
   Field (elf_shdr, 2) = copy_int32 (hdr->sh_flags);
@@ -545,7 +547,8 @@ CAMLprim value caml_elf_sh_get_internal (value shdr, value elf_shdr)
   Field (elf_shdr, 7) = copy_int32 (hdr->sh_info);
   Field (elf_shdr, 8) = copy_int32 (hdr->sh_addralign);
   Field (elf_shdr, 9) = copy_int32 (hdr->sh_entsize);
-  CAMLreturn (Val_unit);
+  Field (elf_shdr, 10) = shdr; 
+  CAMLreturn (elf_shdr);
 }
 
 CAMLprim value caml_elf_newscn (value elf)
@@ -574,7 +577,7 @@ CAMLprim value caml_elf_data_put (value elf_data, value data)
   READ_FIELD (d_size, Int64_val);
   READ_FIELD (d_off, Int64_val);
   READ_FIELD (d_align, Int64_val);
-  READ_FIELD (d_version, Int32_val);
+  READ_FIELD (d_version, Int_val);
   END_CAML_BLOCK ();
   CAMLreturn (Val_unit);
 }
@@ -592,7 +595,7 @@ CAMLprim value caml_elf_data_get (value elf_data)
   WRITE_FIELD (d_size, copy_int64);
   WRITE_FIELD (d_off, copy_int64);
   WRITE_FIELD (d_align, copy_int64);
-  WRITE_FIELD (d_version, copy_int32);
+  WRITE_FIELD (d_version, Val_int);
   WRITE_FIELD_IM (elf_data, ID);
   END_CAML_BLOCK ();
   CAMLreturn (elf_header);

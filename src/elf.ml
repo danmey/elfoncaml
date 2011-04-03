@@ -266,13 +266,13 @@ and scnhdr = {
     sh_entsize		:word;
     shdr                :section;
 }
-and data = {
-  d_buf     : (int, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t option;
+and ('a,'b) data = {
+  d_buf     : ('a, 'b, Bigarray.c_layout) Bigarray.Array1.t option;
   d_type    : dtype;
   d_size    : size;
   d_off     : off;
   d_align   : size;
-  d_version : word;
+  d_version : version;
   data      : elf32_data;
 }
 and dtype =
@@ -547,36 +547,21 @@ end
 module SectionHeader = struct
   type native_t = section
   type t = scnhdr
-  external from_section : section -> t = "caml_elf_elf32_getshdr"
-  external put : t -> native_t -> unit = "caml_elf_sh_put"
-  external get_internal : native_t -> t -> unit = "caml_elf_sh_get_internal"
-  let get shdr =
-    let hdr = {
-    sh_name		= 0l;
-    sh_type		= 0l;
-    sh_flags		= 0l;
-    sh_addr		= 0L;
-    sh_offset		= 0L;
-    sh_size		= 0l;
-    sh_link		= 0l;
-    sh_info		= 0l;
-    sh_addralign	= 0l;
-    sh_entsize		= 0l;
-    shdr                = shdr;
-    } in
-    get_internal shdr hdr;
-    hdr
+  external elf32_getshdr : section -> native_t = "caml_elf_elf32_getshdr"
+  external put : native_t -> t -> unit = "caml_elf_sh_put"
+  external get : native_t -> t = "caml_elf_sh_get"
 
   let update hdr =
-    put hdr hdr.shdr
+     put hdr.shdr hdr
       
+  let from_section scn = get (elf32_getshdr scn)
 end
 
 module SectionData = struct
   type native_t = elf32_data
-  type t = data
-  external put : native_t -> t -> unit = "caml_elf_data_put"
-  external get : native_t -> t = "caml_elf_data_get"
+  type ('a,'b) t = ('a,'b) data
+  external put : native_t -> ('a,'b) t -> unit = "caml_elf_data_put"
+  external get : native_t -> ('a,'b) t = "caml_elf_data_get"
 
   let create scn =
     let hdr = create_data scn in
