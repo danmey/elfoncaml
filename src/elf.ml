@@ -178,7 +178,8 @@ let section_data section =
 type ptr = Int64.t
 type offset = Int64.t
 type size = Int64.t
-
+type word = Int32.t
+type half = int
 type elf_header = {
   e_ident     : elf_ident;
   e_type      : elf_type;
@@ -187,13 +188,14 @@ type elf_header = {
   e_entry     : ptr;
   e_phoff     : offset;
   e_shoff     : offset;
-  e_flags     : int;
-  e_ehsize    : size;
-  e_phentsize : size;
-  e_phnum     : int;
-  e_shentsize : size;
-  e_shnum     : int;
-  e_shstrndx  : int;
+  e_flags     : word;
+  e_ehsize    : half;
+  e_phentsize : half;
+  e_phnum     : half;
+  e_shentsize : half;
+  e_shnum     : half;
+  e_shstrndx  : half;
+  ehdr: elf32_ehdr;
 }
 and elf_ident = {
   mag0 : char;
@@ -254,6 +256,7 @@ and phdr = {
   p_memsz : int;
   p_flags : int;
   p_align : int;
+  mutable phdr: elf32_phdr;
 }
 and pt =
   | PT_NULL
@@ -269,6 +272,17 @@ and pt =
   | PT_HIOS
   | PT_LOPROC
   | PT_HIPROC
+and scnhdr = {
+  sh_name : int;
+  sh_type : int;
+  sh_flags : int;
+  sh_addr : int;
+  sh_offset: offset;
+  sh_size : int;
+  sh_link : int;
+  sh_info : int;
+  sh_addralign : int;
+  sh_entsize : int; }
 
 
 let ei_nident = 16
@@ -286,7 +300,7 @@ module Elf32Header = struct
   type native_t = elf32_ehdr
   external put : t -> native_t -> unit = "caml_elf_elf32_put"
   external get_internal : native_t -> t -> unit = "caml_elf_elf32_get_internal"
-  let get nt =
+  let get ehdr =
     let default = {
       e_ident =
         { mag0 = char_of_int 0x7f;
@@ -303,17 +317,27 @@ module Elf32Header = struct
       e_entry     = 0L;
       e_phoff     = 0L;
       e_shoff     = 0L;
-      e_flags     = 0;
-      e_ehsize    = 0L;
-      e_phentsize = 0L;
+      e_flags     = 0l;
+      e_ehsize    = 0;
+      e_phentsize = 0;
       e_phnum     = 0;
-      e_shentsize = 0L;
+      e_shentsize = 0;
       e_shnum     = 0;
-      e_shstrndx  = 0; }
+      e_shstrndx  = 0;
+      ehdr = ehdr;
+    }
     in
-    get_internal nt default;
+    get_internal ehdr default;
     default
-  let create elf = get (elf32_header elf)
+
+  let create elf =
+    let hdr = elf32_header elf in
+    get hdr
+
+  let update hdr =
+    put hdr hdr.ehdr
+
+
   let to_string
     { e_ident = { 
       mag0;
@@ -478,18 +502,14 @@ module Elf32Header = struct
       | `ARCA -> "Arca RISC Microprocessor"
       | `UNICORE -> "Microprocessor series from PKU-Unity Ltd. and MPRC of Peking University"
       | `NUM -> "NUM") ^ "\n" 
-    ^ "Version:\t" ^ (match e_version with
-      | EV_NONE -> "EV_NONE"
-      | EV_CURRENT -> "EV_CURRENT"
-      | EV_NUM -> "EV_NUM") ^ "\n"
     ^ "Entry point address:\t" ^ f "0x%Lx" e_entry ^ "\n"
     ^ "Start of program headers:\t" ^ Int64.to_string e_phoff ^ "\n"
     ^ "Start of section headers:\t" ^ Int64.to_string e_shoff ^ "\n"
-    ^ "Flags:\t" ^ string_of_int e_flags ^ "\n"
-    ^ "Size of this header:\t" ^ Int64.to_string e_ehsize ^ "\n"
-    ^ "Size of program headers:\t" ^ Int64.to_string e_phentsize ^ "\n"
+    ^ "Flags:\t" ^ Int32.to_string e_flags ^ "\n"
+    ^ "Size of this header:\t" ^ string_of_int e_ehsize ^ "\n"
+    ^ "Size of program headers:\t" ^ string_of_int e_phentsize ^ "\n"
     ^ "Number of program headers:\t" ^ string_of_int e_phnum ^ "\n"
-    ^ "Size of section headers:\t" ^ Int64.to_string e_shentsize ^ "\n"
+    ^ "Size of section headers:\t" ^ string_of_int e_shentsize ^ "\n"
     ^ "Number of section headers:\t" ^ string_of_int e_shnum ^ "\n"
     ^ "Section header string table index:\t" ^ string_of_int e_shstrndx ^ "\n"
 end
@@ -499,8 +519,8 @@ module ProgramHeader = struct
   type native_t = elf32_phdr
   external put : t -> native_t -> unit = "caml_elf_ph_put"
   external get_internal : native_t -> t -> unit = "caml_elf_ph_get_internal"
-  let get nt =
-    let default = {
+  let get phdr =
+    let hdr = {
       p_type = PT_NULL;
       p_offset = 0L;
       p_vaddr = 0L;
@@ -509,12 +529,22 @@ module ProgramHeader = struct
       p_memsz = 0;
       p_flags = 0;
       p_align = 0;
-    }
-    in
-    get_internal nt default;
-    default
-  let create elf = get (program_header elf)
+      phdr = phdr;
+    } in
+    get_internal phdr hdr;
+    hdr
+
+  let create elf = 
+    let hdr = program_header elf in
+    get hdr
+
+  let update hdr =
+    put hdr hdr.phdr
+
 end
 
+(* module Section = struct *)
+(* } Elf32_Shdr; *)
 
+(* end *)
 exception Elf_error of string * string
