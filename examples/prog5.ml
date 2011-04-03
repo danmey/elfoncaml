@@ -34,6 +34,24 @@ let _ =
                 sh_flags = [SHF_ALLOC];
                 sh_entsize = 0l;
               };
+              
+              let scn = create_section elf in
+              let data = SectionData.create scn in
+              let c = int_of_char in
+              SectionData.update { data with 
+                d_align = 1L;
+                d_buf = Some (Bigarray.Array1.of_array Bigarray.int8_unsigned Bigarray.c_layout 
+                                (Array.map c [|
+                                  char_of_int 0; 
+                                  '.'; 'f'; 'o'; 'o'; char_of_int 0;
+                                  '.'; 's'; 'h'; 's';'t'; char_of_int 0;
+                                  'r'; 't'; 'a'; 'b'; char_of_int 0;
+                                |]));
+                d_off = 0L;
+                d_size = 17L;
+                d_type = T_BYTE;
+                d_version = EV_CURRENT;
+              };
 
               
           ()
