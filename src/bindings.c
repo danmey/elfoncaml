@@ -8,7 +8,6 @@
 #include <caml/custom.h>
 #include <caml/callback.h>
 #include <caml/bigarray.h>
-#undef __LIBELF_HEADER_ELF_H
 #include <libelf.h>
 #include <gelf.h>
 #include <string.h>
@@ -465,7 +464,6 @@ int pt_to_int(int v)
   return 0;
 }
 
-  
 CAMLprim value caml_elf_ph (value elf)
 {
   CAMLparam1 (elf);
@@ -563,3 +561,40 @@ CAMLprim value caml_elf_newdata (value scn)
   Elf_Data* data = elf_newdata (Elf_Scn_val (scn));
   CAMLreturn (alloc_elf32_data (data));
 }
+
+CAMLprim value caml_elf_data_put (value elf_data, value data)
+{
+  CAMLparam2 (elf_data, data);
+  Elf_Data* hdr = Elf_Data_val (elf_data);
+  BEGIN_CAML_BLOCK (0, data);
+#define BA(x) (x ? Data_bigarray_val (x) : 0)
+  READ_FIELD (d_buf, BA);
+#undef BA
+  READ_FIELD (d_type, Int_val);
+  READ_FIELD (d_size, Int64_val);
+  READ_FIELD (d_off, Int64_val);
+  READ_FIELD (d_align, Int64_val);
+  READ_FIELD (d_version, Int32_val);
+  END_CAML_BLOCK ();
+  CAMLreturn (Val_unit);
+}
+
+CAMLprim value caml_elf_data_get (value elf_data)
+{
+  CAMLparam1 (elf_data);
+  CAMLlocal1 (elf_header);
+  Elf_Data* hdr = Elf_Data_val (elf_data);
+  elf_header = caml_alloc_small(7, 0);
+  BEGIN_CAML_BLOCK (0, elf_header);
+#define BA(x) (x != 0 ? caml_ba_alloc(CAML_BA_UINT8|CAML_BA_C_LAYOUT|CAML_BA_EXTERNAL, 1, x, 0) : x)
+  WRITE_FIELD (d_buf, BA);
+  WRITE_FIELD (d_type, Val_int);
+  WRITE_FIELD (d_size, copy_int64);
+  WRITE_FIELD (d_off, copy_int64);
+  WRITE_FIELD (d_align, copy_int64);
+  WRITE_FIELD (d_version, copy_int32);
+  WRITE_FIELD_IM (elf_data, ID);
+  END_CAML_BLOCK ();
+  CAMLreturn (elf_header);
+}
+

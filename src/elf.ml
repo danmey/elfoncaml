@@ -267,7 +267,7 @@ and scnhdr = {
     shdr                :section;
 }
 and data = {
-  d_buf     : (int, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t;
+  d_buf     : (int, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t option;
   d_type    : dtype;
   d_size    : size;
   d_off     : off;
@@ -297,7 +297,6 @@ and dtype =
 
 external elf_version : int -> int = "caml_elf_version"
 let version v = elf_version (int_of_ev v) |> ev_of_int
-
 external begins : Unix.file_descr -> elf_cmd -> elf option -> elf = "caml_elf_begin"
 external kind : elf -> elf_kind = "caml_elf_kind"
 external str_section : elf -> section = "caml_elf_str_section"
@@ -305,12 +304,11 @@ external sections : elf -> section list = "caml_elf_sections"
 external section_name : elf -> section -> section -> string = "caml_elf_section_name"
 external section_index : section -> int = "caml_elf_section_index"
 external section_size : section -> int = "caml_elf_section_size"
-external section_data_fill : section -> section_data -> unit
-  = "caml_elf_section_data_fill"
+external section_data_fill : section -> section_data -> unit = "caml_elf_section_data_fill"
 external elf32_header : elf -> elf32_ehdr = "caml_elf_elf32_header"
 external program_header : elf -> elf32_phdr = "caml_elf_ph"
 external create_section : elf -> section = "caml_elf_newscn"
-external create_data : section -> data = "caml_elf_newdata"
+external create_data : section -> elf32_data = "caml_elf_newdata"
 
 let section_data section =
   let size = section_size section in
@@ -574,29 +572,19 @@ module SectionHeader = struct
       
 end
 
-(* module SectionData = struct *)
-(*   type native_t = section *)
-(*   type t = data *)
-(*   external from_section : section -> t = "caml_elf_elf32_getshdr" *)
-(*   external put : t -> native_t -> unit = "caml_elf_sh_put" *)
-(*   external get_internal : native_t -> t -> unit = "caml_elf_sh_get_internal" *)
-(*   let get data = *)
-(*     let hdr = { *)
-(*       d_buf     =  *)
-(*       d_type    = dtype; *)
-(*       d_size    = size; *)
-(*       d_off     = off; *)
-(*       d_align   = size; *)
-(*       d_version = word; *)
-(*       data      = elf32_data; *)
+module SectionData = struct
+  type native_t = elf32_data
+  type t = data
+  external put : native_t -> t -> unit = "caml_elf_data_put"
+  external get : native_t -> t = "caml_elf_data_get"
 
-(*     } in *)
-(*     get_internal shdr hdr; *)
-(*     hdr *)
+  let create scn =
+    let hdr = create_data scn in
+    get hdr
 
-(*   let update hdr = *)
-(*     put hdr hdr.shdr *)
+  let update hdr =
+    put hdr.data hdr
       
-(* end *)
+end
 
 exception Elf_error of string * string

@@ -20,8 +20,9 @@ let _ =
               Elf32Header.update ehdr;
               let phdr = ProgramHeader.create elf in
               let scn = create_section elf in
-              let data = create_data scn in
-
+              let data = SectionData.create scn in
+              SectionData.update data;
+              
           ()
           (* match kind with *)
           (*   | Elf.K_ELF -> *)
