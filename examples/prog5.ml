@@ -6,20 +6,20 @@ let _ =
       | `NONE -> print_endline "ELF library initialization failed"
       | _ -> 
         begin 
-          let fd = Unix.openfile Sys.argv.(1) [Unix.O_WRONLY;Unix.O_CREAT;] 0777 in
-          let elf = Elf.begins fd Elf.C_WRITE None in
-          (* let kind = Elf.kind elf in *)
-          let module ELf32 = Elf.Elf32Header in
-          let ehdr = Elf.Elf32Header.create elf in
           let open Elf in
-              let new_hdr = { ehdr with 
-                e_ident = { ehdr.e_ident with data = Elf.ELFDATA2MSB };
-                e_machine = `PPC;
-                e_type = ET_EXEC;
-              } in
-              let phdr = Elf.ProgramHeader.create elf in
-              
-              
+              let fd = Unix.openfile Sys.argv.(1) [Unix.O_WRONLY;Unix.O_CREAT;] 0777 in
+              let elf = begins fd C_WRITE None in
+              let ehdr = Elf32Header.create elf in
+              let ehdr = 
+                { ehdr with 
+                  e_ident = 
+                    { ehdr.e_ident with data = Elf.ELFDATA2MSB };
+                  e_machine = `PPC;
+                  e_type = ET_EXEC; } 
+              in
+              Elf32Header.update ehdr;
+              let phdr = ProgramHeader.create elf in
+              let scn = create_section elf in
               
           ()
           (* match kind with *)

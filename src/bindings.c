@@ -28,6 +28,8 @@ static struct custom_operations elf_ops = {
 #define Elf32_Ehdr_val(v) (*((Elf32_Ehdr **) Data_custom_val(v)))
 #define Elf32_Phdr_val(v) (*((Elf32_Phdr **) Data_custom_val(v)))
 #define Elf32_Shdr_val(v) (*((Elf32_Shdr **) Data_custom_val(v)))
+#define Elf_Data_val(v) (*((Elf_Data **) Data_custom_val(v)))
+
 #define GElf_Shdr_val(v)  (*((GElf_Shdr **)  Data_custom_val(v)))
 
 //static value * elf_error_exn = NULL;
@@ -86,6 +88,12 @@ static value alloc_elf32_shdr(Elf32_Shdr* s) {
 static value alloc_elf32_scn(Elf_Scn* s) {
   value v = alloc_custom(&elf_ops, sizeof(Elf_Scn *), 0, 1);
   Elf_Scn_val(v) = s;
+  return v;
+}
+
+static value alloc_elf32_data(Elf_Data* s) {
+  value v = alloc_custom(&elf_ops, sizeof(Elf_Data *), 0, 1);
+  Elf_Data_val(v) = s;
   return v;
 }
 
@@ -524,4 +532,11 @@ CAMLprim value caml_elf_newscn (value elf)
   CAMLparam1 (elf);
   Elf_Scn* scn = elf_newscn (Elf_val (elf));
   CAMLreturn (alloc_elf32_scn (scn));
+}
+
+CAMLprim value caml_elf_newdata (value scn)
+{
+  CAMLparam1 (scn);
+  Elf_Data* data = elf_newdata (Elf_Scn_val (scn));
+  CAMLreturn (alloc_elf32_data (data));
 }

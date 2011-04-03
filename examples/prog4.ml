@@ -22,8 +22,8 @@ let _ =
                     (Elf.section_name elf sec str_section)) sections;
             (* Printf.printf ".shstrab: size = %d\n" (Elf.section_size str_section); *)
               let data = Elf.section_data str_section in
-              for i = 0 to (Elf.SectionData.dim data) - 1 do
-                Printf.printf "%c" (char_of_int (Elf.SectionData.get data i));
+              for i = 0 to (Elf.SectionBuffer.dim data) - 1 do
+                Printf.printf "%c" (char_of_int (Elf.SectionBuffer.get data i));
                 print_char (if i mod 16 = 0 then '\n' else ' ');
               done
             | _ -> failwith (Printf.sprintf "%s is not an ELF object." Sys.argv.(1))
