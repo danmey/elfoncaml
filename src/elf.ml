@@ -621,3 +621,4 @@ module SectionData = struct
 end
 
 exception Elf_error of string * string
+let _ = Callback.register_exception "Elf.Elf_error" (Elf_error ("",""))

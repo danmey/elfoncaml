@@ -31,27 +31,26 @@ static struct custom_operations elf_ops = {
 
 #define GElf_Shdr_val(v)  (*((GElf_Shdr **)  Data_custom_val(v)))
 
-//static value * elf_error_exn = NULL;
+static value * elf_error_exn = NULL;
 
 static void elf_error (char *cmdname) {
-  //value res;
-  value name = Val_unit, err = Val_unit;
+  CAMLlocal3 (res, name, err);
+  name = Val_unit, err = Val_unit;
 
   Begin_roots2 (name, err);
-    /* name = copy_string (cmdname); */
-  //    err = copy_string (elf_errmsg (-1));
-    /* if (elf_error_exn == NULL) { */
-    /*   elf_error_exn = caml_named_value("Elf.Elf_error"); */
-    /*   if (elf_error_exn == NULL) */
-    /*     invalid_argument("Exception Elf.Elf_error not initialized, please link elf.cma"); */
-    /* } */
-    /* res = alloc_small(3, 0); */
-    /* Field(res, 0) = *elf_error_exn; */
-    /* Field(res, 1) = name; */
-    /* Field(res, 2) = err; */
-    failwith(elf_errmsg (-1));
+  name = copy_string (cmdname);
+  err = copy_string (elf_errmsg (-1));
+  if (elf_error_exn == NULL) {
+    elf_error_exn = caml_named_value("Elf.Elf_error");
+    if (elf_error_exn == NULL)
+      invalid_argument("Exception Elf.Elf_error not initialized, please link elf.cma");
+  }
+  res = alloc_small(3, 0);
+  Field(res, 0) = *elf_error_exn;
+  Field(res, 1) = name;
+  Field(res, 2) = err;
   End_roots();
-  //  mlraise(res);
+  mlraise(res);
 }
 
 static value alloc_elf(Elf* s) {
