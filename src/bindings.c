@@ -483,6 +483,69 @@ unsigned long sht_to_int(int v)
   return 0;
 }
 
+static unsigned long shf_tab[] =
+  { SHF_WRITE,
+    SHF_ALLOC,
+    SHF_EXECINSTR,
+    SHF_MERGE,
+    SHF_STRINGS,
+    /* SHF_INFO, */
+    /* SHF_LINK, */
+    /* SHF_OS, */
+    SHF_GROUP,
+    SHF_TLS,
+    SHF_MASKOS,
+    SHF_MASKPROC };
+
+unsigned long shf_to_int(int v)
+{
+  int i;
+  for (i=0; i < sizeof(shf_tab)/sizeof(shf_tab[0]); i++)
+    if (shf_tab[i] == v)
+      return i;
+  failwith ("shf_to_int: Wrong enum.");
+  return 0;
+}
+
+unsigned long mlflags_to_int (value list)
+{
+  unsigned long result = 0;
+  do {
+    if (Is_block (list)) {
+      result |= shf_tab[Int_val (Field (list, 0))];
+      list = Field (list, 1);
+    }
+    else return result;
+  } while (1);
+}
+
+value int_to_mlflags (unsigned long flags)
+{
+  CAMLparam0 ();
+  CAMLlocal2 (result, list);
+  int i;
+  /* if (flags == 0) */
+    result = Val_int (0);
+  /* else { */
+  /*   result = alloc_small (2,0); */
+  /*   for (i=0; i < sizeof(shf_tab)/sizeof(shf_tab[0]); i++) { */
+  /*     if (shf_tab[i] & flags) { */
+  /*       Field (list, 0) = Val_int (i); */
+  /*       if (i == sizeof(shf_tab)/sizeof(shf_tab[0]) - 1) { */
+  /*         Field (list, 1) = Val_int (0); */
+  /*       } */
+  /*       else */
+  /*         { */
+  /*           Field (list, 1) = alloc_small (2,0); */
+  /*           list = Field (list, 1); */
+  /*         } */
+  /*     } */
+  /*   } */
+  /* } */
+  CAMLreturn (result);
+}
+
+
 CAMLprim value caml_elf_ph (value elf)
 {
   CAMLparam1 (elf);
@@ -539,7 +602,7 @@ CAMLprim value caml_elf_sh_put (value shdr, value elf_shdr)
   Elf32_Shdr* hdr = Elf32_Shdr_val (shdr);
   hdr->sh_name      = Int32_val (Field (elf_shdr, 0));
   hdr->sh_type      = sht_to_int (Int_val (Field (elf_shdr, 1)));
-  hdr->sh_flags     = Int32_val (Field (elf_shdr, 2));
+  hdr->sh_flags     = mlflags_to_int (Field (elf_shdr, 2));
   hdr->sh_addr      = Int64_val (Field (elf_shdr, 3));
   hdr->sh_offset    = Int64_val (Field (elf_shdr, 4));
   hdr->sh_size      = Int32_val (Field (elf_shdr, 5));
@@ -558,7 +621,7 @@ CAMLprim value caml_elf_sh_get (value shdr)
   elf_shdr  = caml_alloc_small(11, 0);
   Field (elf_shdr, 0) = copy_int32 (hdr->sh_name);
   Field (elf_shdr, 1) = Val_int (sht_tab[hdr->sh_type]);
-  Field (elf_shdr, 2) = copy_int32 (hdr->sh_flags);
+  Field (elf_shdr, 2) = int_to_mlflags (hdr->sh_flags);
   Field (elf_shdr, 3) = copy_int64 (hdr->sh_addr);
   Field (elf_shdr, 4) = copy_int64 (hdr->sh_offset);
   Field (elf_shdr, 5) = copy_int32 (hdr->sh_size);

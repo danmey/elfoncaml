@@ -31,6 +31,8 @@ let _ =
               SectionHeader.update { shdr with
                 sh_name = 1l;
                 sh_type = SHT_HASH;
+                sh_flags = [SHF_ALLOC];
+                sh_entsize = 0l;
               };
 
               

@@ -256,7 +256,7 @@ and pt =
 and scnhdr = {
     sh_name		:word;
     sh_type		:sh_type;
-    sh_flags		:word;
+    sh_flags		:sh_flags list;
     sh_addr		:addr;
     sh_offset		:off;
     sh_size		:word;
@@ -290,6 +290,19 @@ and scnhdr = {
     | SHT_HIPROC
     | SHT_LOUSER
     | SHT_HIUSER
+and sh_flags =
+  | SHF_WRITE
+  | SHF_ALLOC
+  | SHF_EXECINSTR
+  | SHF_MERGE
+  | SHF_STRINGS
+  | SHF_INFO_LINK
+  | SHF_LINK_ORDER
+  | SHF_OS_NONCONFORMING
+  | SHF_GROUP
+  | SHF_TLS
+  | SHF_MASKOS
+  | SHF_MASKPROC
 
 
 and ('a,'b) data = {
