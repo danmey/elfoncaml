@@ -689,3 +689,45 @@ CAMLprim value caml_elf_set_str_section_index  (value e, value index) {
   elfx_update_shstrndx (elf, Int_val (index));
   CAMLreturn (Val_unit);
   }
+
+CAMLprim value caml_elf_update (value e, value ec) {
+  CAMLparam2 (e, ec);
+  Elf* elf = Elf_val (e);
+  if (elf_update (elf, Int_val (ec)) < 0)
+    elf_error ("elf_update");
+  CAMLreturn (Val_unit);
+}
+
+CAMLprim value caml_elf_fsize (value t, value c, value v) {
+  CAMLparam3 (t, c, v);
+  CAMLreturn (Val_int (elf32_fsize (Int_val (t), Int32_val (c), Int_val(v))));
+}
+
+unsigned long f_tab[] = {ELF_F_DIRTY, ELF_F_LAYOUT, ELF_F_LAYOUT_OVERLAP};
+
+unsigned long f_to_int(int v)
+{
+  int i;
+  for (i=0; i < sizeof(f_tab)/sizeof(f_tab[0]); i++)
+    if (f_tab[i] == v)
+      return i;
+  failwith ("f_to_int: Wrong enum.");
+  return 0;
+}
+
+CAMLprim value caml_elf_program_header_flags (value e, value ec, value f)
+{
+  CAMLparam3 (e, ec, f);
+  Elf* elf = Elf_val (e);
+  elf_flagphdr (elf, Int_val (ec), f_tab [Int_val (f)]);
+  CAMLreturn (Val_unit);
+}
+
+CAMLprim value caml_elf_ends (value e)
+{
+  CAMLparam1 (e);
+  Elf* elf = Elf_val (e);
+  elf_end (elf);
+  CAMLreturn (Val_unit);
+}
+

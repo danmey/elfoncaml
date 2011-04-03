@@ -333,10 +333,15 @@ and dtype =
     | T_VDEF
     | T_VNEED
     | T_NUM
+and elf_flags =
+  | F_DIRTY
+  | F_LAYOUT
+  | F_LAYOUT_OVERLAP
 
 external elf_version : int -> int = "caml_elf_version"
 let version v = elf_version (int_of_ev v) |> ev_of_int
 external begins : Unix.file_descr -> elf_cmd -> elf option -> elf = "caml_elf_begin"
+external ends : elf -> unit = "caml_elf_ends"
 external kind : elf -> elf_kind = "caml_elf_kind"
 external str_section : elf -> section = "caml_elf_str_section"
 external sections : elf -> section list = "caml_elf_sections"
@@ -349,6 +354,10 @@ external program_header : elf -> elf32_phdr = "caml_elf_ph"
 external create_section : elf -> section = "caml_elf_newscn"
 external create_data : section -> elf32_data = "caml_elf_newdata"
 external set_str_section_index : elf -> int -> unit = "caml_elf_set_str_section_index"
+external update : elf -> elf_cmd -> unit = "caml_elf_update"
+external fsize : dtype -> int32 -> version -> int = "caml_elf_fsize"
+external program_header_flags : elf -> elf_cmd -> elf_flags -> unit = "caml_elf_program_header_flags"
+
 let section_data section =
   let size = section_size section in
   let ba = Bigarray.Array1.create Bigarray.int8_unsigned Bigarray.c_layout size in
