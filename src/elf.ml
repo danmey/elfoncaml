@@ -169,6 +169,7 @@ external section_data_fill : section -> section_data -> unit
   = "caml_elf_section_data_fill"
 external elf32_header : elf -> elf32_ehdr = "caml_elf_elf32_header"
 external program_header : elf -> elf32_phdr = "caml_elf_ph"
+external create_section : elf -> section = "caml_elf_newscn"
 
 let section_data section =
   let size = section_size section in
@@ -556,8 +557,31 @@ module SectionHeader = struct
     sh_info		:word;
     sh_addralign	:word;
     sh_entsize		:word;
+    shdr                :section;
   }
-  type native_t = elf32_shdr
+  type native_t = section
   external from_section : section -> t = "caml_elf_elf32_getshdr"
+  external put : t -> native_t -> unit = "caml_elf_sh_put"
+  external get_internal : native_t -> t -> unit = "caml_elf_sh_get_internal"
+  let get shdr =
+    let hdr = {
+    sh_name		= 0l;
+    sh_type		= 0l;
+    sh_flags		= 0l;
+    sh_addr		= 0L;
+    sh_offset		= 0L;
+    sh_size		= 0l;
+    sh_link		= 0l;
+    sh_info		= 0l;
+    sh_addralign	= 0l;
+    sh_entsize		= 0l;
+    shdr                = shdr;
+    } in
+    get_internal shdr hdr;
+    hdr
+
+  let update hdr =
+    put hdr hdr.shdr
+      
 end
 exception Elf_error of string * string

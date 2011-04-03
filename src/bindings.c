@@ -83,6 +83,12 @@ static value alloc_elf32_shdr(Elf32_Shdr* s) {
   return v;
 }
 
+static value alloc_elf32_scn(Elf_Scn* s) {
+  value v = alloc_custom(&elf_ops, sizeof(Elf_Scn *), 0, 1);
+  Elf_Scn_val(v) = s;
+  return v;
+}
+
 CAMLprim value caml_elf_version (value version) {
   CAMLparam1 (version); 
   CAMLreturn (Val_int (elf_version (Int_val (version))));
@@ -442,9 +448,9 @@ CAMLprim value caml_elf_ph (value elf)
 
 CAMLprim value caml_elf_ph_put (value elf_header, value phdr)
 {
-  CAMLparam2 (phdr, phdr);
+  CAMLparam2 (elf_header, phdr);
   Elf32_Phdr* hdr = Elf32_Phdr_val (phdr);
-  hdr->p_type  = pt_tab[Val_int (Field (elf_header, 0))];
+  hdr->p_type  = pt_tab[Int_val (Field (elf_header, 0))];
   hdr->p_offset = Int64_val (Field (elf_header, 1));
   hdr->p_vaddr  = Int64_val (Field (elf_header, 2));
   hdr->p_paddr  = Int64_val (Field (elf_header, 3));
@@ -479,3 +485,43 @@ CAMLprim value caml_elf_elf32_getshdr (value section)
   CAMLreturn (alloc_elf32_shdr (shdr));
 }
   
+CAMLprim value caml_elf_sh_put (value elf_shdr, value shdr)
+{
+  CAMLparam2 (elf_shdr, shdr);
+  Elf32_Shdr* hdr = Elf32_Shdr_val (shdr);
+  hdr->sh_name      = Int32_val (Field (elf_shdr, 0));
+  hdr->sh_type      = Int32_val (Field (elf_shdr, 1));
+  hdr->sh_flags     = Int32_val (Field (elf_shdr, 2));
+  hdr->sh_addr      = Int64_val (Field (elf_shdr, 3));
+  hdr->sh_offset    = Int64_val (Field (elf_shdr, 4));
+  hdr->sh_size      = Int32_val (Field (elf_shdr, 5));
+  hdr->sh_link      = Int32_val (Field (elf_shdr, 6));
+  hdr->sh_info      = Int32_val (Field (elf_shdr, 7));
+  hdr->sh_addralign = Int32_val (Field (elf_shdr, 8));
+  hdr->sh_entsize   = Int32_val (Field (elf_shdr, 9));
+  CAMLreturn (Val_unit);
+}
+
+CAMLprim value caml_elf_sh_get_internal (value shdr, value elf_shdr)
+{
+  CAMLparam2 (shdr, elf_shdr);
+  Elf32_Shdr* hdr = Elf32_Shdr_val (shdr);
+  Field (elf_shdr, 0) = copy_int32 (hdr->sh_name);
+  Field (elf_shdr, 1) = copy_int32 (hdr->sh_type);
+  Field (elf_shdr, 2) = copy_int32 (hdr->sh_flags);
+  Field (elf_shdr, 3) = copy_int64 (hdr->sh_addr);
+  Field (elf_shdr, 4) = copy_int64 (hdr->sh_offset);
+  Field (elf_shdr, 5) = copy_int32 (hdr->sh_size);
+  Field (elf_shdr, 6) = copy_int32 (hdr->sh_link);
+  Field (elf_shdr, 7) = copy_int32 (hdr->sh_info);
+  Field (elf_shdr, 8) = copy_int32 (hdr->sh_addralign);
+  Field (elf_shdr, 9) = copy_int32 (hdr->sh_entsize);
+  CAMLreturn (Val_unit);
+}
+
+CAMLprim value caml_elf_newscn (value elf)
+{
+  CAMLparam1 (elf);
+  Elf_Scn* scn = elf_newscn (Elf_val (elf));
+  CAMLreturn (alloc_elf32_scn (scn));
+}
