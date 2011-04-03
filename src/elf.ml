@@ -148,6 +148,7 @@ type section
 type section_data = (int, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
 type elf32_ehdr
 type elf32_phdr
+type elf32_shdr
 module SectionData = Bigarray.Array1
 
 let (-|) f g x = f (g x)
@@ -175,8 +176,8 @@ let section_data section =
   section_data_fill section ba;
   ba
 
-type ptr = Int64.t
-type offset = Int64.t
+type addr = Int64.t
+type off = Int64.t
 type size = Int64.t
 type word = Int32.t
 type half = int
@@ -185,9 +186,9 @@ type elf_header = {
   e_type      : elf_type;
   e_machine   : machine;
   e_version   : version;
-  e_entry     : ptr;
-  e_phoff     : offset;
-  e_shoff     : offset;
+  e_entry     : addr;
+  e_phoff     : off;
+  e_shoff     : off;
   e_flags     : word;
   e_ehsize    : half;
   e_phentsize : half;
@@ -249,9 +250,9 @@ and elf_type =
 
 and phdr = {
   p_type : pt;
-  p_offset : offset;
-  p_vaddr : ptr;
-  p_paddr : ptr;
+  p_offset : off;
+  p_vaddr : addr;
+  p_paddr : addr;
   p_filesz : int;
   p_memsz : int;
   p_flags : int;
@@ -277,7 +278,7 @@ and scnhdr = {
   sh_type : int;
   sh_flags : int;
   sh_addr : int;
-  sh_offset: offset;
+  sh_offset: off;
   sh_size : int;
   sh_link : int;
   sh_info : int;
@@ -543,8 +544,20 @@ module ProgramHeader = struct
 
 end
 
-(* module Section = struct *)
-(* } Elf32_Shdr; *)
-
-(* end *)
+module SectionHeader = struct
+  type t = {
+    sh_name		:word;
+    sh_type		:word;
+    sh_flags		:word;
+    sh_addr		:addr;
+    sh_offset		:off;
+    sh_size		:word;
+    sh_link		:word;
+    sh_info		:word;
+    sh_addralign	:word;
+    sh_entsize		:word;
+  }
+  type native_t = elf32_shdr
+  external from_section : section -> t = "caml_elf_elf32_getshdr"
+end
 exception Elf_error of string * string

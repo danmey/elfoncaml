@@ -77,6 +77,12 @@ static value alloc_elf32_phdr(Elf32_Phdr* s) {
   return v;
 }
 
+static value alloc_elf32_shdr(Elf32_Shdr* s) {
+  value v = alloc_custom(&elf_ops, sizeof(Elf32_Shdr *), 0, 1);
+  Elf32_Shdr_val(v) = s;
+  return v;
+}
+
 CAMLprim value caml_elf_version (value version) {
   CAMLparam1 (version); 
   CAMLreturn (Val_int (elf_version (Int_val (version))));
@@ -464,3 +470,12 @@ CAMLprim value caml_elf_ph_get_internal (value phdr, value elf_phdr)
   CAMLreturn (Val_unit);
 }
 
+CAMLprim value caml_elf_elf32_getshdr (value section)
+{
+  CAMLparam1 (section);
+  Elf32_Shdr* shdr = 0;
+  if ( (shdr = elf32_getshdr (Elf_Scn_val (section))) == 0)
+    elf_error ("elf_getshdr");
+  CAMLreturn (alloc_elf32_shdr (shdr));
+}
+  
