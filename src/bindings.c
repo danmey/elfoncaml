@@ -365,33 +365,44 @@ int et_to_int(int v)
   return 0;
 }
 
+#define BEGIN_CAML_BLOCK(f,x) do { int _field = f; value _hdr = x;
+#define END_CAML_BLOCK()  } while (0)
+#define READ_FIELD(name, convert) hdr->name = convert (Field (_hdr, _field)); _field++;
+#define WRITE_FIELD(name, convert) Field (_hdr, _field) = convert (hdr->name); _field++;
+#define WRITE_FIELD_IM(name, convert) Field (_hdr, _field) = convert (name); _field++;
+
 CAMLprim value caml_elf_elf32_put (value efhdr, value elf_header)
 {
   CAMLparam2 (efhdr, elf_header);
   CAMLlocal1 (e_ident);
   Elf32_Ehdr* hdr = Elf32_Ehdr_val (efhdr);
   e_ident = Field (elf_header, 0);
-  hdr->e_ident[0] = Int_val (Field (e_ident, 0));
-  hdr->e_ident[1] = Int_val (Field (e_ident, 1));
-  hdr->e_ident[2] = Int_val (Field (e_ident, 2));
-  hdr->e_ident[3] = Int_val (Field (e_ident, 3));
-  hdr->e_ident[4] = Int_val (Field (e_ident, 4));
-  hdr->e_ident[5] = Int_val (Field (e_ident, 5));
-  hdr->e_ident[6] = Int_val (Field (e_ident, 6));
-  hdr->e_ident[7] = Int_val (Field (e_ident, 7));
-  hdr->e_type      = et_tab[Int_val (Field (elf_header, 1))];
-  hdr->e_machine   = variant_to_enum  (Field (elf_header, 2));
-  hdr->e_version   = Int_val (Field (elf_header, 3));
-  hdr->e_entry     = Int64_val (Field (elf_header, 4));
-  hdr->e_phoff     = Int64_val (Field (elf_header, 5));
-  hdr->e_shoff     = Int64_val (Field (elf_header, 6));
-  hdr->e_flags     = Int64_val (Field (elf_header, 7));
-  hdr->e_ehsize    = Int_val (Field (elf_header, 8));
-  hdr->e_phentsize = Int_val (Field (elf_header, 9));
-  hdr->e_phnum     = Int_val (Field (elf_header, 10));
-  hdr->e_shentsize = Int_val (Field (elf_header, 11));
-  hdr->e_shnum     = Int_val (Field (elf_header, 12));
-  hdr->e_shstrndx  = Int_val (Field (elf_header, 13));
+  BEGIN_CAML_BLOCK (0, e_ident);
+  READ_FIELD (e_ident[_field], Int_val);
+  READ_FIELD (e_ident[_field], Int_val);
+  READ_FIELD (e_ident[_field], Int_val);
+  READ_FIELD (e_ident[_field], Int_val);
+  READ_FIELD (e_ident[_field], Int_val);
+  READ_FIELD (e_ident[_field], Int_val);
+  READ_FIELD (e_ident[_field], Int_val);
+  READ_FIELD (e_ident[_field], Int_val);
+  END_CAML_BLOCK ();
+#define ET_TAB(what) et_tab[Int_val (what)]
+  BEGIN_CAML_BLOCK (1, elf_header);
+  READ_FIELD(e_type, ET_TAB);
+  READ_FIELD(e_machine, variant_to_enum);
+  READ_FIELD(e_version   , Int_val);
+  READ_FIELD(e_entry     , Int64_val);
+  READ_FIELD(e_phoff     , Int64_val);
+  READ_FIELD(e_shoff     , Int64_val);
+  READ_FIELD(e_flags     , Int64_val);
+  READ_FIELD(e_ehsize    , Int_val);
+  READ_FIELD(e_phentsize , Int_val);
+  READ_FIELD(e_phnum     , Int_val);
+  READ_FIELD(e_shentsize , Int_val);
+  READ_FIELD(e_shnum     , Int_val);
+  READ_FIELD(e_shstrndx  , Int_val);
+  END_CAML_BLOCK ();
   CAMLreturn (Val_unit);
 }
 
@@ -401,30 +412,36 @@ CAMLprim value caml_elf_elf32_get (value efhdr)
   CAMLlocal2 (e_ident, elf_header);
   Elf32_Ehdr* hdr = Elf32_Ehdr_val (efhdr);
   e_ident = caml_alloc_small(8, 0);
-  Field (e_ident, 0) = Val_int (hdr->e_ident[0]);
-  Field (e_ident, 1) = Val_int (hdr->e_ident[1]);
-  Field (e_ident, 2) = Val_int (hdr->e_ident[2]);
-  Field (e_ident, 3) = Val_int (hdr->e_ident[3]);
-  Field (e_ident, 4) = Val_int (hdr->e_ident[4]);
-  Field (e_ident, 5) = Val_int (hdr->e_ident[5]);
-  Field (e_ident, 6) = Val_int (hdr->e_ident[6]);
-  Field (e_ident, 7) = Val_int (hdr->e_ident[7]);
+  BEGIN_CAML_BLOCK (0, e_ident);
+  WRITE_FIELD (e_ident[_field], Val_int);
+  WRITE_FIELD (e_ident[_field], Val_int);
+  WRITE_FIELD (e_ident[_field], Val_int);
+  WRITE_FIELD (e_ident[_field], Val_int);
+  WRITE_FIELD (e_ident[_field], Val_int);
+  WRITE_FIELD (e_ident[_field], Val_int);
+  WRITE_FIELD (e_ident[_field], Val_int);
+  WRITE_FIELD (e_ident[_field], Val_int);
+  END_CAML_BLOCK ();
   elf_header = caml_alloc_small(14, 0);
-  Field (elf_header, 0) = e_ident;
-  Field (elf_header, 1) = Val_int (et_to_int (hdr->e_type));
-  Field (elf_header, 2) = enum_to_variant (hdr->e_machine);
-  Field (elf_header, 3) = Val_int (hdr->e_version);
-  Field (elf_header, 4) = copy_int64 (hdr->e_entry);
-  Field (elf_header, 5) = copy_int64 (hdr->e_phoff);
-  Field (elf_header, 6) = copy_int64 (hdr->e_shoff);
-  Field (elf_header, 7) = copy_int64 (hdr->e_flags);
-  Field (elf_header, 8) = Val_int (hdr->e_ehsize);
-  Field (elf_header, 9) = Val_int (hdr->e_phentsize);
-  Field (elf_header, 10) = Val_int (hdr->e_phnum);
-  Field (elf_header, 11) = Val_int (hdr->e_shentsize);
-  Field (elf_header, 12) = Val_int (hdr->e_shnum);
-  Field (elf_header, 13) = Val_int (hdr->e_shstrndx);
-  Field (elf_header, 14) = efhdr;
+#define ET_TO_INT(x) Val_int (et_to_int (x));
+#define ID(x) x
+  BEGIN_CAML_BLOCK (0, elf_header);
+  WRITE_FIELD_IM (e_ident, ID);
+  WRITE_FIELD (e_type, ET_TO_INT);
+  WRITE_FIELD (e_machine, enum_to_variant);
+  WRITE_FIELD (e_version, Val_int);
+  WRITE_FIELD (e_entry, copy_int64);
+  WRITE_FIELD (e_phoff, copy_int64);
+  WRITE_FIELD (e_shoff, copy_int64);
+  WRITE_FIELD (e_flags, copy_int64);
+  WRITE_FIELD (e_ehsize, Val_int);
+  WRITE_FIELD (e_phentsize, Val_int);
+  WRITE_FIELD (e_phnum, Val_int);
+  WRITE_FIELD (e_shentsize, Val_int);
+  WRITE_FIELD (e_shnum, Val_int);
+  WRITE_FIELD (e_shstrndx, Val_int);
+  WRITE_FIELD_IM (efhdr, ID);
+  END_CAML_BLOCK ();
   CAMLreturn (elf_header);
 }
 
