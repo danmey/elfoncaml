@@ -524,24 +524,24 @@ value int_to_mlflags (unsigned long flags)
   CAMLparam0 ();
   CAMLlocal2 (result, list);
   int i;
-  /* if (flags == 0) */
+  if (flags == 0)
     result = Val_int (0);
-  /* else { */
-  /*   result = alloc_small (2,0); */
-  /*   for (i=0; i < sizeof(shf_tab)/sizeof(shf_tab[0]); i++) { */
-  /*     if (shf_tab[i] & flags) { */
-  /*       Field (list, 0) = Val_int (i); */
-  /*       if (i == sizeof(shf_tab)/sizeof(shf_tab[0]) - 1) { */
-  /*         Field (list, 1) = Val_int (0); */
-  /*       } */
-  /*       else */
-  /*         { */
-  /*           Field (list, 1) = alloc_small (2,0); */
-  /*           list = Field (list, 1); */
-  /*         } */
-  /*     } */
-  /*   } */
-  /* } */
+  else {
+    result = alloc_small (2,0);
+    for (i=0; i < sizeof(shf_tab)/sizeof(shf_tab[0]); i++) {
+      if (shf_tab[i] & flags) {
+        Field (list, 0) = Val_int (i);
+        if (i == sizeof(shf_tab)/sizeof(shf_tab[0]) - 1) {
+          Field (list, 1) = Val_int (0);
+        }
+        else
+          {
+            Field (list, 1) = alloc_small (2,0);
+            list = Field (list, 1);
+          }
+      }
+    }
+  }
   CAMLreturn (result);
 }
 
@@ -683,3 +683,9 @@ CAMLprim value caml_elf_data_get (value elf_data)
   CAMLreturn (elf_header);
 }
 
+CAMLprim value caml_elf_set_str_section_index  (value e, value index) {
+  CAMLparam2 (e, index);
+  Elf* elf = Elf_val (e);
+  elfx_update_shstrndx (elf, Int_val (index));
+  CAMLreturn (Val_unit);
+  }

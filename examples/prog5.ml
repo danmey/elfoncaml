@@ -52,7 +52,13 @@ let _ =
                 d_type = T_BYTE;
                 d_version = EV_CURRENT;
               };
-
+              SectionHeader.update { (SectionHeader.from_section scn) with
+                sh_name = 6l;
+                sh_type = SHT_STRTAB;
+                sh_flags = [SHF_STRINGS;SHF_ALLOC];
+                sh_entsize = 0l;
+              };
+              set_str_section_index elf (section_index scn);
               
           ()
           (* match kind with *)

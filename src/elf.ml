@@ -348,7 +348,7 @@ external elf32_header : elf -> elf32_ehdr = "caml_elf_elf32_header"
 external program_header : elf -> elf32_phdr = "caml_elf_ph"
 external create_section : elf -> section = "caml_elf_newscn"
 external create_data : section -> elf32_data = "caml_elf_newdata"
-
+external set_str_section_index : elf -> int -> unit = "caml_elf_set_str_section_index"
 let section_data section =
   let size = section_size section in
   let ba = Bigarray.Array1.create Bigarray.int8_unsigned Bigarray.c_layout size in
