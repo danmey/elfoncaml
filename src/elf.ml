@@ -331,45 +331,15 @@ end
 module Elf32Header = struct
   type t = elf_header
   type native_t = elf32_ehdr
-  external put : t -> native_t -> unit = "caml_elf_elf32_put"
-  external get_internal : native_t -> t -> unit = "caml_elf_elf32_get_internal"
-  let get ehdr =
-    let default = {
-      e_ident =
-        { mag0 = char_of_int 0x7f;
-          mag1 = 'E';
-          mag2 = 'L';
-          mag3 = 'F';
-          eclass = ELFCLASS32;
-          adata = ELFDATA2MSB;
-          osabi = ELFOSABI_LINUX;
-          abiversion = 0; };
-      e_type      = ET_NONE;
-      e_machine   = `I386;
-      e_version   = EV_NONE;
-      e_entry     = 0L;
-      e_phoff     = 0L;
-      e_shoff     = 0L;
-      e_flags     = 0l;
-      e_ehsize    = 0;
-      e_phentsize = 0;
-      e_phnum     = 0;
-      e_shentsize = 0;
-      e_shnum     = 0;
-      e_shstrndx  = 0;
-      ehdr = ehdr;
-    }
-    in
-    get_internal ehdr default;
-    default
+  external put : native_t -> t -> unit = "caml_elf_elf32_put"
+  external get : native_t -> t = "caml_elf_elf32_get"
 
   let create elf =
     let hdr = elf32_header elf in
     get hdr
 
   let update hdr =
-    put hdr hdr.ehdr
-
+    put hdr.ehdr hdr
 
   let to_string
     { e_ident = { 
