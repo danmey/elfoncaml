@@ -255,7 +255,7 @@ and pt =
   | PT_HIPROC
 and scnhdr = {
     sh_name		:word;
-    sh_type		:word;
+    sh_type		:sh_type;
     sh_flags		:word;
     sh_addr		:addr;
     sh_offset		:off;
@@ -265,7 +265,33 @@ and scnhdr = {
     sh_addralign	:word;
     sh_entsize		:word;
     shdr                :section;
-}
+} and sh_type =
+    | SHT_NULL
+    | SHT_PROGBITS
+    | SHT_SYMTAB
+    | SHT_STRTAB
+    | SHT_RELA
+    | SHT_HASH
+    | SHT_DYNAMIC
+    | SHT_NOTE
+    | SHT_NOBITS
+    | SHT_REL
+    | SHT_SHLIB
+    | SHT_DYNSYM
+    | SHT_INIT_ARRAY
+    | SHT_FINI_ARRAY
+    | SHT_PREINIT_ARRAY
+    | SHT_GROUP
+    | SHT_SYMTAB_SHNDX
+    | SHT_NUM
+    | SHT_LOOS
+    | SHT_HIOS
+    | SHT_LOPROC
+    | SHT_HIPROC
+    | SHT_LOUSER
+    | SHT_HIUSER
+
+
 and ('a,'b) data = {
   d_buf     : ('a, 'b, Bigarray.c_layout) Bigarray.Array1.t option;
   d_type    : dtype;
@@ -340,7 +366,7 @@ module Elf32Header = struct
     put hdr.ehdr hdr
 
   let to_string
-    { e_ident = { 
+    { e_ident = {
       mag0;
       mag1;
       mag2;
@@ -502,7 +528,7 @@ module Elf32Header = struct
       | `SEP -> "Sharp embedded microprocessor"
       | `ARCA -> "Arca RISC Microprocessor"
       | `UNICORE -> "Microprocessor series from PKU-Unity Ltd. and MPRC of Peking University"
-      | `NUM -> "NUM") ^ "\n" 
+      | `NUM -> "NUM") ^ "\n"
     ^ "Entry point address:\t" ^ f "0x%Lx" e_entry ^ "\n"
     ^ "Start of program headers:\t" ^ Int64.to_string e_phoff ^ "\n"
     ^ "Start of section headers:\t" ^ Int64.to_string e_shoff ^ "\n"
@@ -535,7 +561,7 @@ module ProgramHeader = struct
     get_internal phdr hdr;
     hdr
 
-  let create elf = 
+  let create elf =
     let hdr = program_header elf in
     get hdr
 
@@ -553,7 +579,7 @@ module SectionHeader = struct
 
   let update hdr =
      put hdr.shdr hdr
-      
+
   let from_section scn = get (elf32_getshdr scn)
 end
 
@@ -569,7 +595,7 @@ module SectionData = struct
 
   let update hdr =
     put hdr.data hdr
-      
+
 end
 
 exception Elf_error of string * string

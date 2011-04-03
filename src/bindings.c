@@ -445,7 +445,7 @@ CAMLprim value caml_elf_elf32_get (value efhdr)
   CAMLreturn (elf_header);
 }
 
-static int pt_tab[] = 
+static unsigned long pt_tab[] = 
 {
   0,1,2,3,4,5,6,7,8,
   0x60000000,
@@ -454,13 +454,32 @@ static int pt_tab[] =
   0x7fffffff
 };
 
-int pt_to_int(int v)
+unsigned long pt_to_int(int v)
 {
   int i;
   for (i=0; i < sizeof(pt_tab)/sizeof(pt_tab[0]); i++)
     if (pt_tab[i] == v)
       return i;
   failwith ("pt_to_int: Wrong enum.");
+  return 0;
+}
+
+static unsigned long sht_tab[] =
+  { 0,1,2,3,4,5,6,7,8,9,10,11,14,15,16,17,18,19,
+  0x60000000,
+  0x6fffffff,
+  0x70000000,
+  0x7fffffff,
+  0x80000000,
+  0xffffffff};
+
+unsigned long sht_to_int(int v)
+{
+  int i;
+  for (i=0; i < sizeof(sht_tab)/sizeof(sht_tab[0]); i++)
+    if (sht_tab[i] == v)
+      return i;
+  failwith ("sht_to_int: Wrong enum.");
   return 0;
 }
 
@@ -519,7 +538,7 @@ CAMLprim value caml_elf_sh_put (value shdr, value elf_shdr)
   CAMLparam2 (shdr, elf_shdr);
   Elf32_Shdr* hdr = Elf32_Shdr_val (shdr);
   hdr->sh_name      = Int32_val (Field (elf_shdr, 0));
-  hdr->sh_type      = Int32_val (Field (elf_shdr, 1));
+  hdr->sh_type      = sht_to_int (Int_val (Field (elf_shdr, 1)));
   hdr->sh_flags     = Int32_val (Field (elf_shdr, 2));
   hdr->sh_addr      = Int64_val (Field (elf_shdr, 3));
   hdr->sh_offset    = Int64_val (Field (elf_shdr, 4));
@@ -538,7 +557,7 @@ CAMLprim value caml_elf_sh_get (value shdr)
   Elf32_Shdr* hdr = Elf32_Shdr_val (shdr);
   elf_shdr  = caml_alloc_small(11, 0);
   Field (elf_shdr, 0) = copy_int32 (hdr->sh_name);
-  Field (elf_shdr, 1) = copy_int32 (hdr->sh_type);
+  Field (elf_shdr, 1) = Val_int (sht_tab[hdr->sh_type]);
   Field (elf_shdr, 2) = copy_int32 (hdr->sh_flags);
   Field (elf_shdr, 3) = copy_int64 (hdr->sh_addr);
   Field (elf_shdr, 4) = copy_int64 (hdr->sh_offset);

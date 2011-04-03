@@ -29,7 +29,9 @@ let _ =
               };
               let shdr = SectionHeader.from_section scn in
               SectionHeader.update { shdr with
-                sh_name = 1l; };
+                sh_name = 1l;
+                sh_type = SHT_HASH;
+              };
 
               
           ()
