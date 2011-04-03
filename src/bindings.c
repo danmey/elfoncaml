@@ -97,7 +97,7 @@ static value alloc_elf32_data(Elf_Data* s) {
 }
 
 CAMLprim value caml_elf_version (value version) {
-  CAMLparam1 (version); 
+  CAMLparam1 (version);
   CAMLreturn (Val_int (elf_version (Int_val (version))));
 }
 
@@ -113,7 +113,7 @@ CAMLprim value caml_elf_begin (value fd, value cmd, value ref) {
 }
 
 CAMLprim value caml_elf_kind (value elf) {
-  CAMLparam1 (elf); 
+  CAMLparam1 (elf);
   CAMLreturn (Val_int (elf_kind (Elf_val (elf))));
 }
 
@@ -155,9 +155,9 @@ CAMLprim value caml_elf_section_name (value elf, value section, value str_sectio
   GElf_Shdr shdr;
   if ( gelf_getshdr (Elf_Scn_val (section), &shdr) != &shdr)
     elf_error ("gelf_getshdr");
-  char* name = elf_strptr 
-    (Elf_val (elf), 
-     elf_ndxscn (Elf_Scn_val (str_section)), 
+  char* name = elf_strptr
+    (Elf_val (elf),
+     elf_ndxscn (Elf_Scn_val (str_section)),
      shdr.sh_name);
   if (!name)
     elf_error ("gelf_strptr");
@@ -186,10 +186,10 @@ CAMLprim value caml_elf_section_data_fill (value section, value bigarray) {
   if (gelf_getshdr (Elf_Scn_val (section), &shdr) != &shdr)
     elf_error ("gelf_getshdr");
   while (n < shdr.sh_size &&
-         (data = elf_getdata (Elf_Scn_val (section), 
+         (data = elf_getdata (Elf_Scn_val (section),
                               data)) != NULL) {
     char* p = (char *) data->d_buf;
-    memcpy (buffer + n, p, data->d_size); 
+    memcpy (buffer + n, p, data->d_size);
     n += data->d_size;
   }
   CAMLreturn (Val_unit);
@@ -202,9 +202,9 @@ CAMLprim value caml_elf_elf32_header (value elf) {
   CAMLreturn (alloc_elf32_ehdr (v));
 }
 
-struct { 
+struct {
   char* name;
-  unsigned int constant; 
+  unsigned int constant;
   value hash;
 } variants[] =
   {
@@ -308,7 +308,7 @@ static void init_polvariants () {
   int i;
   if (variants[0].hash == 0)
     {
-      for (i=0; i < sizeof(variants) / sizeof(variants[0]); 
+      for (i=0; i < sizeof(variants) / sizeof(variants[0]);
            i++)
         variants[i].hash = hash_variant (variants[i].name);
     }
@@ -318,8 +318,8 @@ static unsigned int variant_to_enum (value hash)
 {
   int i=0;
   init_polvariants ();
-  for (i=0; 
-       i < sizeof(variants) / sizeof(variants[0]); 
+  for (i=0;
+       i < sizeof(variants) / sizeof(variants[0]);
        i++) {
         if (variants[i].hash == hash)
           return variants[i].constant;
@@ -341,18 +341,18 @@ static value enum_to_variant (unsigned int en)
   return 0;
 }
 
-static int et_tab[] = 
+static int et_tab[] =
 {
-  0,
-  1,
-  2,
-  3,
-  4,
-  5,
-  0xfe00,
-  0xfeff,
-  0xff00,
-  0xffff
+  ET_NONE,
+  ET_REL,
+  ET_EXEC,
+  ET_DYN,
+  ET_CORE,
+  ET_NUM,
+  ET_LOOS,
+  ET_HIOS,
+  ET_LOPROC,
+  ET_HIPROC,
 };
 
 int et_to_int(int v)
@@ -445,7 +445,7 @@ CAMLprim value caml_elf_elf32_get (value efhdr)
   CAMLreturn (elf_header);
 }
 
-static unsigned long pt_tab[] = 
+static unsigned long pt_tab[] =
 {
   0,1,2,3,4,5,6,7,8,
   0x60000000,
@@ -465,20 +465,40 @@ unsigned long pt_to_int(int v)
 }
 
 static unsigned long sht_tab[] =
-  { 0,1,2,3,4,5,6,7,8,9,10,11,14,15,16,17,18,19,
-  0x60000000,
-  0x6fffffff,
-  0x70000000,
-  0x7fffffff,
-  0x80000000,
-  0xffffffff};
+  { SHT_NULL,
+  SHT_PROGBITS,
+  SHT_SYMTAB,
+  SHT_STRTAB,
+  SHT_RELA,
+  SHT_HASH,
+  SHT_DYNAMIC,
+  SHT_NOTE,
+  SHT_NOBITS,
+  SHT_REL,
+  SHT_SHLIB,
+  SHT_DYNSYM,
+  SHT_INIT_ARRAY,
+  SHT_FINI_ARRAY,
+  SHT_PREINIT_ARRAY,
+  SHT_GROUP,
+  SHT_SYMTAB_SHNDX,
+  SHT_NUM,
+  SHT_LOOS,
+  SHT_HIOS,
+  SHT_LOPROC,
+  SHT_HIPROC,
+  SHT_LOUSER,
+  SHT_HIUSER};
 
-unsigned long sht_to_int(int v)
+unsigned long sht_to_int(unsigned long v)
 {
   int i;
   for (i=0; i < sizeof(sht_tab)/sizeof(sht_tab[0]); i++)
     if (sht_tab[i] == v)
+      {
+        printf("shttab: %d\n", sht_tab[i]);
       return i;
+      }
   failwith ("sht_to_int: Wrong enum.");
   return 0;
 }
@@ -595,13 +615,13 @@ CAMLprim value caml_elf_elf32_getshdr (value section)
     elf_error ("elf_getshdr");
   CAMLreturn (alloc_elf32_shdr (shdr));
 }
-  
+
 CAMLprim value caml_elf_sh_put (value shdr, value elf_shdr)
 {
   CAMLparam2 (shdr, elf_shdr);
   Elf32_Shdr* hdr = Elf32_Shdr_val (shdr);
   hdr->sh_name      = Int32_val (Field (elf_shdr, 0));
-  hdr->sh_type      = sht_to_int (Int_val (Field (elf_shdr, 1)));
+  hdr->sh_type      = sht_tab [Int_val (Field (elf_shdr, 1))];
   hdr->sh_flags     = mlflags_to_int (Field (elf_shdr, 2));
   hdr->sh_addr      = Int64_val (Field (elf_shdr, 3));
   hdr->sh_offset    = Int64_val (Field (elf_shdr, 4));
@@ -620,7 +640,7 @@ CAMLprim value caml_elf_sh_get (value shdr)
   Elf32_Shdr* hdr = Elf32_Shdr_val (shdr);
   elf_shdr  = caml_alloc_small(11, 0);
   Field (elf_shdr, 0) = copy_int32 (hdr->sh_name);
-  Field (elf_shdr, 1) = Val_int (sht_tab[hdr->sh_type]);
+  Field (elf_shdr, 1) = Val_int (sht_to_int (hdr->sh_type));
   Field (elf_shdr, 2) = int_to_mlflags (hdr->sh_flags);
   Field (elf_shdr, 3) = copy_int64 (hdr->sh_addr);
   Field (elf_shdr, 4) = copy_int64 (hdr->sh_offset);
@@ -629,7 +649,7 @@ CAMLprim value caml_elf_sh_get (value shdr)
   Field (elf_shdr, 7) = copy_int32 (hdr->sh_info);
   Field (elf_shdr, 8) = copy_int32 (hdr->sh_addralign);
   Field (elf_shdr, 9) = copy_int32 (hdr->sh_entsize);
-  Field (elf_shdr, 10) = shdr; 
+  Field (elf_shdr, 10) = shdr;
   CAMLreturn (elf_shdr);
 }
 
@@ -652,7 +672,7 @@ CAMLprim value caml_elf_data_put (value elf_data, value data)
   CAMLparam2 (elf_data, data);
   Elf_Data* hdr = Elf_Data_val (elf_data);
   BEGIN_CAML_BLOCK (0, data);
-#define BA(x) (x ? Data_bigarray_val (x) : 0)
+#define BA(x) (Is_block(x) ? Data_bigarray_val (Field(x,1)) : 0)
   READ_FIELD (d_buf, BA);
 #undef BA
   READ_FIELD (d_type, Int_val);
@@ -664,6 +684,17 @@ CAMLprim value caml_elf_data_put (value elf_data, value data)
   CAMLreturn (Val_unit);
 }
 
+value build_ba (void *x)
+{
+  CAMLparam0();
+  CAMLlocal1(option);
+  option = Val_int(0);
+  /* option = caml_alloc_small (2, 0); */
+  /* Field(option, 0) = Val_int(1); */
+  //  Field(option, 1) = caml_ba_alloc(CAML_BA_UINT8|CAML_BA_C_LAYOUT|CAML_BA_EXTERNAL, 1, x, 0);
+  CAMLreturn (option);
+}
+
 CAMLprim value caml_elf_data_get (value elf_data)
 {
   CAMLparam1 (elf_data);
@@ -671,7 +702,7 @@ CAMLprim value caml_elf_data_get (value elf_data)
   Elf_Data* hdr = Elf_Data_val (elf_data);
   elf_header = caml_alloc_small(7, 0);
   BEGIN_CAML_BLOCK (0, elf_header);
-#define BA(x) (x != 0 ? caml_ba_alloc(CAML_BA_UINT8|CAML_BA_C_LAYOUT|CAML_BA_EXTERNAL, 1, x, 0) : x)
+#define BA(x) ((x) != 0 ? build_ba (x) : Val_int (0))
   WRITE_FIELD (d_buf, BA);
   WRITE_FIELD (d_type, Val_int);
   WRITE_FIELD (d_size, copy_int64);

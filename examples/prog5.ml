@@ -22,18 +22,18 @@ let _ =
               SectionData.update { data with
                 d_align = 4L;
                 d_off = 0L;
-                d_buf = Some (Bigarray.Array1.of_array Bigarray.int32 Bigarray.c_layout [|0x01234567l;0x89abcdefl;0xdeadc0del|]);
+                (* d_buf = Some (Bigarray.Array1.of_array Bigarray.int32 Bigarray.c_layout [|0x01234567l;0x89abcdefl;0xdeadc0del|]); *)
                 d_type = T_WORD;
                 d_size = 12L;
                 d_version = EV_CURRENT;
               };
               let shdr = SectionHeader.from_section scn in
-              (* SectionHeader.update { shdr with *)
-              (*   sh_name = 1l; *)
-              (*   sh_type = SHT_HASH; *)
-              (*   sh_flags = [SHF_ALLOC]; *)
-              (*   sh_entsize = 0l; *)
-              (* }; *)
+              SectionHeader.update { shdr with
+                sh_name = 1l;
+                sh_type = SHT_HASH;
+                sh_flags = [SHF_ALLOC];
+                sh_entsize = 0l;
+              };
               
               let scn = create_section elf in
               let data = SectionData.create scn in
@@ -52,12 +52,12 @@ let _ =
                 d_type = T_BYTE;
                 d_version = EV_CURRENT;
               };
-              (* SectionHeader.update { (SectionHeader.from_section scn) with *)
-              (*   sh_name = 6l; *)
-              (*   sh_type = SHT_STRTAB; *)
-              (*   sh_flags = [SHF_STRINGS;SHF_ALLOC]; *)
-              (*   sh_entsize = 0l; *)
-              (* }; *)
+              SectionHeader.update { (SectionHeader.from_section scn) with
+                sh_name = 6l;
+                sh_type = SHT_STRTAB;
+                sh_flags = [SHF_STRINGS;SHF_ALLOC];
+                sh_entsize = 0l;
+              };
               set_str_section_index elf (section_index scn);
               update elf C_NULL;
               let ehdr = Elf32Header.get ehdr.ehdr in
