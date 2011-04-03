@@ -209,6 +209,7 @@ struct {
   value hash;
 } variants[] =
   {
+    { "NONE", EM_NONE, 0},
     { "M32", EM_M32, 0},
     { "SPARC", EM_SPARC, 0},
     { "I386", EM_386, 0},
@@ -422,7 +423,7 @@ CAMLprim value caml_elf_elf32_get (value efhdr)
   WRITE_FIELD (e_ident[_field], Val_int);
   WRITE_FIELD (e_ident[_field], Val_int);
   END_CAML_BLOCK ();
-  elf_header = caml_alloc_small(14, 0);
+  elf_header = caml_alloc_small(15, 0);
 #define ET_TO_INT(x) Val_int (et_to_int (x));
 #define ID(x) x
   BEGIN_CAML_BLOCK (0, elf_header);
@@ -477,14 +478,17 @@ CAMLprim value caml_elf_ph_put (value elf_header, value phdr)
 {
   CAMLparam2 (elf_header, phdr);
   Elf32_Phdr* hdr = Elf32_Phdr_val (phdr);
-  hdr->p_type  = pt_tab[Int_val (Field (elf_header, 0))];
-  hdr->p_offset = Int64_val (Field (elf_header, 1));
-  hdr->p_vaddr  = Int64_val (Field (elf_header, 2));
-  hdr->p_paddr  = Int64_val (Field (elf_header, 3));
-  hdr->p_filesz = Int_val (Field (elf_header, 4));
-  hdr->p_memsz  = Int_val (Field (elf_header, 5));
-  hdr->p_flags  = Int_val (Field (elf_header, 6));
-  hdr->p_align  = Int_val (Field (elf_header, 7));
+  BEGIN_CAML_BLOCK (0, elf_header);
+#define PT_TAB(x) pt_tab[Int_val (x)]
+  READ_FIELD (p_type, PT_TAB);
+  READ_FIELD (p_offset, Int64_val);
+  READ_FIELD (p_vaddr , Int64_val);
+  READ_FIELD (p_paddr , Int64_val);
+  READ_FIELD (p_filesz, Int_val);
+  READ_FIELD (p_memsz , Int_val);
+  READ_FIELD (p_flags , Int_val);
+  READ_FIELD (p_align , Int_val);
+  END_CAML_BLOCK ();
   CAMLreturn (Val_unit);
 }
 
