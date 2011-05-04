@@ -22,20 +22,20 @@ static struct custom_operations elf_ops = {
 };
 
 /* Accessing the libelf data structures in O'Caml block */
-#define ElfStructVal(name) \
+#define Struct(name) \
   static inline name* name##_val(value v) { return (*((name**) Data_custom_val(v))); } \
   static inline value alloc_##name(name* s) { \
     value v = alloc_custom(&elf_ops, sizeof(name *), 0, 1); \
     (*((name**) Data_custom_val(v))) = s; \
     return v; }
 
-ElfStructVal(Elf)
-ElfStructVal(Elf_Scn)
-ElfStructVal(Elf32_Ehdr)
-ElfStructVal(Elf32_Phdr)
-ElfStructVal(Elf32_Shdr)
-ElfStructVal(Elf_Data)
-ElfStructVal(GElf_Shdr)
+Struct(Elf)
+Struct(Elf_Scn)
+Struct(Elf32_Ehdr)
+Struct(Elf32_Phdr)
+Struct(Elf32_Shdr)
+Struct(Elf_Data)
+Struct(GElf_Shdr)
 
 static value * elf_error_exn = NULL;
 
