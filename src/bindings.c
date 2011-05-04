@@ -494,10 +494,7 @@ unsigned long sht_to_int(unsigned long v)
   int i;
   for (i=0; i < sizeof(sht_tab)/sizeof(sht_tab[0]); i++)
     if (sht_tab[i] == v)
-      {
-        printf("shttab: %d\n", sht_tab[i]);
       return i;
-      }
   failwith ("sht_to_int: Wrong enum.");
   return 0;
 }
@@ -671,7 +668,7 @@ CAMLprim value caml_elf_data_put (value elf_data, value data)
   CAMLparam2 (elf_data, data);
   Elf_Data* hdr = Elf_Data_val (elf_data);
   BEGIN_CAML_BLOCK (0, data);
-#define BA(x) (Is_block(x) ? Data_bigarray_val (Field(x,1)) : 0)
+#define BA(x) (Is_block(x) ? Data_bigarray_val (Field(x,0)) : 0)
   READ_FIELD (d_buf, BA);
 #undef BA
   READ_FIELD (d_type, Int_val);

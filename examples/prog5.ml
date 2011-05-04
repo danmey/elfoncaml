@@ -22,7 +22,7 @@ let _ =
               SectionData.update { data with
                 d_align = 4L;
                 d_off = 0L;
-                (* d_buf = Some (Bigarray.Array1.of_array Bigarray.int32 Bigarray.c_layout [|0x01234567l;0x89abcdefl;0xdeadc0del|]); *)
+                d_buf = Some (Bigarray.Array1.of_array Bigarray.int32 Bigarray.c_layout [|0x01234567l;0x89abcdefl;0xdeadc0del|]);
                 d_type = T_WORD;
                 d_size = 12L;
                 d_version = EV_CURRENT;
