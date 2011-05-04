@@ -22,18 +22,24 @@ static struct custom_operations elf_ops = {
 };
 
 /* Accessing the libelf data structures in O'Caml block */
-#define ElfStructVal(name,v) (*((name**) Data_custom_val(v)))
+#define ElfStructVal(name) \
+  static inline name* name##_val(value v) { return (*((name**) Data_custom_val(v))); } \
+  static inline value alloc_##name(name* s) { \
+    value v = alloc_custom(&elf_ops, sizeof(name *), 0, 1); \
+    (*((name**) Data_custom_val(v))) = s; \
+    return v; }
 
-#define Elf_val(v)        ElfStructVal(Elf,v)
-#define Elf_Scn_val(v)    ElfStructVal(Elf_Scn,v)
-#define Elf32_Ehdr_val(v) ElfStructVal(Elf32_Ehdr,v)
-#define Elf32_Phdr_val(v) ElfStructVal(Elf32_Phdr,v)
-#define Elf32_Shdr_val(v) ElfStructVal(Elf32_Shdr,v)
-#define Elf_Data_val(v)   ElfStructVal(Elf_Data,v)
-#define GElf_Shdr_val(v)  ElfStructVal(GElf_Shdr,v)
+ElfStructVal(Elf)
+ElfStructVal(Elf_Scn)
+ElfStructVal(Elf32_Ehdr)
+ElfStructVal(Elf32_Phdr)
+ElfStructVal(Elf32_Shdr)
+ElfStructVal(Elf_Data)
+ElfStructVal(GElf_Shdr)
 
 static value * elf_error_exn = NULL;
 
+/* Throw Elf_error exception */
 static void elf_error (char *cmdname) {
   CAMLlocal3 (res, name, err);
   name = Val_unit, err = Val_unit;
@@ -54,48 +60,6 @@ static void elf_error (char *cmdname) {
   mlraise(res);
 }
 
-static value alloc_elf(Elf* s) {
-  value v = alloc_custom(&elf_ops, sizeof(Elf *), 0, 1);
-  Elf_val(v) = s;
-  return v;
-}
-
-static value alloc_elf_scn(Elf_Scn* s) {
-  value v = alloc_custom(&elf_ops, sizeof(Elf_Scn *), 0, 1);
-  Elf_Scn_val(v) = s;
-  return v;
-}
-
-static value alloc_elf32_ehdr(Elf32_Ehdr* s) {
-  value v = alloc_custom(&elf_ops, sizeof(Elf32_Ehdr *), 0, 1);
-  Elf32_Ehdr_val(v) = s;
-  return v;
-}
-
-static value alloc_elf32_phdr(Elf32_Phdr* s) {
-  value v = alloc_custom(&elf_ops, sizeof(Elf32_Phdr *), 0, 1);
-  Elf32_Phdr_val(v) = s;
-  return v;
-}
-
-static value alloc_elf32_shdr(Elf32_Shdr* s) {
-  value v = alloc_custom(&elf_ops, sizeof(Elf32_Shdr *), 0, 1);
-  Elf32_Shdr_val(v) = s;
-  return v;
-}
-
-static value alloc_elf32_scn(Elf_Scn* s) {
-  value v = alloc_custom(&elf_ops, sizeof(Elf_Scn *), 0, 1);
-  Elf_Scn_val(v) = s;
-  return v;
-}
-
-static value alloc_elf32_data(Elf_Data* s) {
-  value v = alloc_custom(&elf_ops, sizeof(Elf_Data *), 0, 1);
-  Elf_Data_val(v) = s;
-  return v;
-}
-
 CAMLprim value caml_elf_version (value version) {
   CAMLparam1 (version);
   CAMLreturn (Val_int (elf_version (Int_val (version))));
@@ -109,7 +73,7 @@ CAMLprim value caml_elf_begin (value fd, value cmd, value ref) {
   elf = elf_begin (Int_val (fd), Int_val (cmd), elf);
   if (elf == 0)
     elf_error ("elf_begin");
-  CAMLreturn (alloc_elf (elf));
+  CAMLreturn (alloc_Elf (elf));
 }
 
 CAMLprim value caml_elf_kind (value elf) {
@@ -124,7 +88,7 @@ CAMLprim value caml_elf_str_section (value e) {
   if (elf_getshdrstrndx (elf, &shstrndx) != 0)
     elf_error ("elf_getshdrstrndx");
   Elf_Scn* scn = elf_getscn (elf, shstrndx);
-  CAMLreturn (alloc_elf_scn (scn));
+  CAMLreturn (alloc_Elf_Scn (scn));
 }
 
 CAMLprim value caml_elf_sections (value e) {
@@ -138,7 +102,7 @@ CAMLprim value caml_elf_sections (value e) {
   list = caml_alloc_small(2, 0);
   node = list;
   while (scn) {
-    Field(node, 0) = alloc_elf_scn (scn);
+    Field(node, 0) = alloc_Elf_Scn (scn);
     scn = elf_nextscn (elf , scn);
     if (scn != 0) {
       Field(node, 1) = caml_alloc_small(2, 0);
@@ -199,7 +163,7 @@ CAMLprim value caml_elf_elf32_header (value elf) {
   CAMLparam1 (elf);
   Elf32_Ehdr* v = elf32_newehdr (Elf_val (elf));
   if (!v) elf_error ("elf32_newehdr");
-  CAMLreturn (alloc_elf32_ehdr (v));
+  CAMLreturn (alloc_Elf32_Ehdr (v));
 }
 
 struct {
@@ -568,7 +532,7 @@ CAMLprim value caml_elf_ph (value elf)
   CAMLparam1 (elf);
   Elf32_Phdr* v = elf32_newphdr (Elf_val (elf), 1);
   if (!v) elf_error ("elf32_newphdr");
-  CAMLreturn (alloc_elf32_phdr (v));
+  CAMLreturn (alloc_Elf32_Phdr (v));
 }
 
 CAMLprim value caml_elf_ph_put (value elf_header, value phdr)
@@ -610,7 +574,7 @@ CAMLprim value caml_elf_elf32_getshdr (value section)
   Elf32_Shdr* shdr = 0;
   if ( (shdr = elf32_getshdr (Elf_Scn_val (section))) == 0)
     elf_error ("elf_getshdr");
-  CAMLreturn (alloc_elf32_shdr (shdr));
+  CAMLreturn (alloc_Elf32_Shdr (shdr));
 }
 
 CAMLprim value caml_elf_sh_put (value shdr, value elf_shdr)
@@ -654,14 +618,14 @@ CAMLprim value caml_elf_newscn (value elf)
 {
   CAMLparam1 (elf);
   Elf_Scn* scn = elf_newscn (Elf_val (elf));
-  CAMLreturn (alloc_elf32_scn (scn));
+  CAMLreturn (alloc_Elf_Scn (scn));
 }
 
 CAMLprim value caml_elf_newdata (value scn)
 {
   CAMLparam1 (scn);
   Elf_Data* data = elf_newdata (Elf_Scn_val (scn));
-  CAMLreturn (alloc_elf32_data (data));
+  CAMLreturn (alloc_Elf_Data (data));
 }
 
 CAMLprim value caml_elf_data_put (value elf_data, value data)
