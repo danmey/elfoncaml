@@ -71,12 +71,19 @@ static inline void* handle_null_option (value option) {
   return 0;
 }
 
-// static inline void* Val_null_option (void* ptr) {
-//   if (ptr)
-//     return (void*)Field (option, 0);
-//   return 0;
-// }
+static inline value null_option (value ptr)
+{
+  value option = Val_int (0);
+  if (ptr) {
+    option = caml_alloc_small (2, 0);
+    Field(option, 0) = Val_int(1);
+    Field(option, 1) = ptr;
+  }
+  return option;
+}
 
+#define Val_null_option(conv, ptr) null_option (conv (ptr))
+  
 #define ml_fun1(ret, name, arg1)                            \
   CAMLprim value caml_##name (value _a1) {                          \
     CAMLparam1 (_a1); \
@@ -108,6 +115,13 @@ CAMLprim Elf_Scn* caml_internal_str_section (Elf* elf) {
 ml_internal_fun3 (alloc_Elf, elf_begin, Int_val, Int_val, handle_null_option);
 ml_internal_fun1 (alloc_Elf_Scn, str_section, Elf_val);
 ml_fun1 (Val_int, elf_kind, Elf_val);
+
+CAMLprim value test (void* ptr)
+{
+  CAMLparam0 ();
+  CAMLreturn (Val_null_option (Val_int, ptr));
+}
+
 CAMLprim value caml_elf_sections (value e) {
   CAMLparam1 (e);
   CAMLlocal2 (list, node);
