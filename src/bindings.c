@@ -65,16 +65,25 @@ CAMLprim value caml_elf_version (value version) {
   CAMLreturn (Val_int (elf_version (Int_val (version))));
 }
 
-CAMLprim value caml_elf_begin (value fd, value cmd, value ref) {
-  CAMLparam3 (fd, cmd, ref);
-  Elf* elf = 0;
-  if (Is_block (ref))           /* If it's Some elf then get Elf* from it */
-    elf = Elf_val (Field (ref, 0));
-  elf = elf_begin (Int_val (fd), Int_val (cmd), elf);
+static inline void* handle_null_option (value option) {
+  if (Is_block (option))
+    return (void*)Field (option, 0);
+  return 0;
+}
+
+#define ml_fun3(ret, name, arg1, arg2, arg3)                            \
+  CAMLprim value caml_##name (value _a1, value _a2, value _a3) {                          \
+    CAMLparam3 (_a1, _a2, _a3); \
+    CAMLreturn (ret (caml_internal_##name (arg1 (_a1), arg2 (_a2), arg3 (_a3)))); }
+    
+CAMLprim Elf* caml_internal_elf_begin (int fd, int cmd, Elf* ref) {
+  Elf* elf = elf_begin (fd, cmd, ref);
   if (elf == 0)
     elf_error ("elf_begin");
-  CAMLreturn (alloc_Elf (elf));
+  return elf;
 }
+
+ml_fun3 (alloc_Elf, elf_begin, Int_val, Int_val, handle_null_option);
 
 CAMLprim value caml_elf_kind (value elf) {
   CAMLparam1 (elf);
