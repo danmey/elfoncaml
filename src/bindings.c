@@ -71,7 +71,23 @@ static inline void* handle_null_option (value option) {
   return 0;
 }
 
-#define ml_fun3(ret, name, arg1, arg2, arg3)                            \
+// static inline void* Val_null_option (void* ptr) {
+//   if (ptr)
+//     return (void*)Field (option, 0);
+//   return 0;
+// }
+
+#define ml_fun1(ret, name, arg1)                            \
+  CAMLprim value caml_##name (value _a1) {                          \
+    CAMLparam1 (_a1); \
+    CAMLreturn (ret (name (arg1 (_a1)))); }
+
+#define ml_internal_fun1(ret, name, arg1)                            \
+  CAMLprim value caml_##name (value _a1) {                          \
+    CAMLparam1 (_a1); \
+    CAMLreturn (ret (caml_internal_##name (arg1 (_a1)))); }
+
+#define ml_internal_fun3(ret, name, arg1, arg2, arg3)                            \
   CAMLprim value caml_##name (value _a1, value _a2, value _a3) {                          \
     CAMLparam3 (_a1, _a2, _a3); \
     CAMLreturn (ret (caml_internal_##name (arg1 (_a1), arg2 (_a2), arg3 (_a3)))); }
@@ -82,24 +98,16 @@ CAMLprim Elf* caml_internal_elf_begin (int fd, int cmd, Elf* ref) {
     elf_error ("elf_begin");
   return elf;
 }
-
-ml_fun3 (alloc_Elf, elf_begin, Int_val, Int_val, handle_null_option);
-
-CAMLprim value caml_elf_kind (value elf) {
-  CAMLparam1 (elf);
-  CAMLreturn (Val_int (elf_kind (Elf_val (elf))));
-}
-
-CAMLprim value caml_elf_str_section (value e) {
-  CAMLparam1 (e);
-  Elf* elf = Elf_val (e);
+CAMLprim Elf_Scn* caml_internal_str_section (Elf* elf) {
   size_t shstrndx;
   if (elf_getshdrstrndx (elf, &shstrndx) != 0)
     elf_error ("elf_getshdrstrndx");
-  Elf_Scn* scn = elf_getscn (elf, shstrndx);
-  CAMLreturn (alloc_Elf_Scn (scn));
+  return elf_getscn (elf, shstrndx);
 }
 
+ml_internal_fun3 (alloc_Elf, elf_begin, Int_val, Int_val, handle_null_option);
+ml_internal_fun1 (alloc_Elf_Scn, str_section, Elf_val);
+ml_fun1 (Val_int, elf_kind, Elf_val);
 CAMLprim value caml_elf_sections (value e) {
   CAMLparam1 (e);
   CAMLlocal2 (list, node);
