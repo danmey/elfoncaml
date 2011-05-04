@@ -115,13 +115,8 @@ CAMLprim Elf_Scn* caml_internal_str_section (Elf* elf) {
 ml_internal_fun3 (alloc_Elf, elf_begin, Int_val, Int_val, handle_null_option);
 ml_internal_fun1 (alloc_Elf_Scn, str_section, Elf_val);
 ml_fun1 (Val_int, elf_kind, Elf_val);
-
-CAMLprim value test (void* ptr)
-{
-  CAMLparam0 ();
-  CAMLreturn (Val_null_option (Val_int, ptr));
-}
-
+//ml_fun1 (alloc_Elf32_Shdr, gelf_getshdr, Elf_Scn_val);
+ml_fun3 (alloc_string, elf_strptr, Elf_val, Int_val, String_val);
 CAMLprim value caml_elf_sections (value e) {
   CAMLparam1 (e);
   CAMLlocal2 (list, node);
@@ -171,7 +166,6 @@ CAMLprim value caml_elf_section_size (value section) {
     elf_error ("gelf_getshdr");
   CAMLreturn (Val_int (shdr.sh_size));
 }
-
 
 CAMLprim value caml_elf_section_data_fill (value section, value bigarray) {
   CAMLparam2 (section, bigarray);
