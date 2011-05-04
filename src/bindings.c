@@ -22,14 +22,15 @@ static struct custom_operations elf_ops = {
 };
 
 /* Accessing the libelf data structures in O'Caml block */
-#define Elf_val(v)        (*((Elf **)        Data_custom_val(v)))
-#define Elf_Scn_val(v)    (*((Elf_Scn **)    Data_custom_val(v)))
-#define Elf32_Ehdr_val(v) (*((Elf32_Ehdr **) Data_custom_val(v)))
-#define Elf32_Phdr_val(v) (*((Elf32_Phdr **) Data_custom_val(v)))
-#define Elf32_Shdr_val(v) (*((Elf32_Shdr **) Data_custom_val(v)))
-#define Elf_Data_val(v) (*((Elf_Data **) Data_custom_val(v)))
+#define ElfStructVal(name,v) (*((name**) Data_custom_val(v)))
 
-#define GElf_Shdr_val(v)  (*((GElf_Shdr **)  Data_custom_val(v)))
+#define Elf_val(v)        ElfStructVal(Elf,v)
+#define Elf_Scn_val(v)    ElfStructVal(Elf_Scn,v)
+#define Elf32_Ehdr_val(v) ElfStructVal(Elf32_Ehdr,v)
+#define Elf32_Phdr_val(v) ElfStructVal(Elf32_Phdr,v)
+#define Elf32_Shdr_val(v) ElfStructVal(Elf32_Shdr,v)
+#define Elf_Data_val(v)   ElfStructVal(Elf_Data,v)
+#define GElf_Shdr_val(v)  ElfStructVal(GElf_Shdr,v)
 
 static value * elf_error_exn = NULL;
 
