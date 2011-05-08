@@ -9,3 +9,8 @@ TAGS
 setup.data
 setup.log
 src/prog4.c
+_tags
+myocamlbuild.ml
+setup.ml
+META
+src/elf.mllib
