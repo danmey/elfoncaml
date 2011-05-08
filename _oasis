@@ -1,12 +1,39 @@
+#                                                               -*-conf-*-
 OASISFormat: 0.2
 Name:        elfoncaml
 Version:     0.0.0
-Synopsis:    O'Caml libelf bindings
+Synopsis:    OCaml libelf bindings
+Description:  Elfoncaml is a set of lowlevel bindings to libelf. The goal
+  is to make manipulation of ELF compatible files possible from OCaml.
 Authors:     Wojciech Meyer
 License:     LGPL
-Plugins:     META (0.2)
+Plugins:     META (0.2), StdFiles (0.2)
 
-Library elf
-  Path:       src
-  BuildTools: ocamlbuild
-  Modules: Elf
+Library elfoncaml
+  Path:         src
+  BuildTools:   ocamlbuild
+  CSources:     Elf_stubs.c
+  CCLib:        -lelf -lbsd
+  BuildDepends: bigarray
+  Modules:      Elf
+
+Executable prog4
+  Path:           examples  
+  MainIs:         prog4.ml
+  CompiledObject: best
+  BuildDepends:   elfoncaml, unix
+  BuildTools:     ocamlbuild
+  Install:        false
+
+Executable prog5
+  Path:           examples  
+  MainIs:         prog5.ml
+  CompiledObject: best
+  BuildDepends:   elfoncaml, unix
+  BuildTools:     ocamlbuild
+  Install:        false
+
+SourceRepository master
+  Type:     git
+  Location: https://danmey@github.com/danmey/elfoncaml.git
+  Browser:  https://github.com/danmey/elfoncaml
