@@ -7,14 +7,15 @@ let _ =
       | _ -> 
         begin 
           let fd = Unix.openfile Sys.argv.(1) [Unix.O_RDONLY] 0 in
-          let elf = Elf.begins fd Elf.C_READ None in
+          let Some elf = Elf.begins fd Elf.C_READ None in
           let kind = Elf.kind elf in
           match kind with
             | Elf.K_ELF ->
               let ehdr = Elf.Elf32Header.get (Elf.elf32_header elf) in
               print_endline (Elf.Elf32Header.to_string ehdr);
               let str_section = Elf.str_section elf in
-              let sections = Elf.sections elf in
+              (* let sections = Elf.sections elf in *)
+              let sections = [] in
               List.iter 
                 (fun sec -> 
                   Printf.printf "Section %-4.4d %s\n" 

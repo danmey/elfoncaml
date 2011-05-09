@@ -14,3 +14,8 @@ myocamlbuild.ml
 setup.ml
 META
 src/elf.mllib
+AUTHORS.txt
+INSTALL.txt
+README.txt
+src/elfoncaml.mllib
+src/libelfoncaml.clib
