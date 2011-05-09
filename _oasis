@@ -17,6 +17,14 @@ Library elfoncaml
   BuildDepends: bigarray
   Modules:      Elf
 
+Executable prog1
+  Path:           examples  
+  MainIs:         prog1.ml
+  CompiledObject: best
+  BuildDepends:   elfoncaml, unix
+  BuildTools:     ocamlbuild
+  Install:        false
+
 Executable prog4
   Path:           examples  
   MainIs:         prog4.ml

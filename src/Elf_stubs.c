@@ -115,6 +115,7 @@ CAMLprim Elf_Scn* caml_internal_str_section (Elf* elf) {
 ml_fun3 (null_option_Elf, elf_begin, Int_val, Int_val, handle_null_option);
 ml_internal_fun1 (alloc_Elf_Scn, str_section, Elf_val);
 ml_fun1 (Val_int, elf_kind, Elf_val);
+ml_fun1 (copy_string, elf_errmsg, Int_val);
 //ml_fun1 (alloc_Elf32_Shdr, gelf_getshdr, Elf_Scn_val);
 //ml_fun3 (alloc_string, elf_strptr, Elf_val, Int_val, String_val);
 
