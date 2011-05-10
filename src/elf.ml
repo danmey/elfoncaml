@@ -36,7 +36,6 @@ type elf_kind =
   | K_ELF
   | K_NUM
 
-
 type elf_ei =
     EI_MAG0
   | EI_MAG1
@@ -304,7 +303,6 @@ and sh_flags =
   | SHF_MASKOS
   | SHF_MASKPROC
 
-
 and ('a,'b) data = {
   d_buf     : ('a, 'b, Bigarray.c_layout) Bigarray.Array1.t option;
   d_type    : dtype;
@@ -341,7 +339,7 @@ and elf_flags =
 external elf_version : int -> int = "caml_elf_version"
 let version v = elf_version (int_of_ev v) |> ev_of_int
 external begins : Unix.file_descr -> elf_cmd -> elf option -> elf option = "caml_elf_begin"
-external ends : elf -> unit = "caml_elf_ends"
+external ends : elf -> unit = "caml_elf_end"
 external errmsg : int -> string = "caml_elf_errmsg"
 external kind : elf -> elf_kind = "caml_elf_kind"
 external str_section : elf -> section = "caml_str_section"

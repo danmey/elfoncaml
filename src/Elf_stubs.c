@@ -61,11 +61,6 @@ static void elf_error (char *cmdname) {
   mlraise(res);
 }
 
-CAMLprim value caml_elf_version (value version) {
-  CAMLparam1 (version);
-  CAMLreturn (Val_int (elf_version (Int_val (version))));
-}
-
 static inline Elf* handle_null_option (value option) {
   if (Is_block (option))
     return Elf_val (Field (option, 0));
@@ -112,7 +107,10 @@ CAMLprim Elf_Scn* caml_internal_str_section (Elf* elf) {
   return elf_getscn (elf, shstrndx);
 }
 
+#define Val_unit2(_a) Val_unit
+ml_fun1 (Val_int, elf_version, Int_val);
 ml_fun3 (null_option_Elf, elf_begin, Int_val, Int_val, handle_null_option);
+ml_fun1 (Val_unit2, elf_end, Elf_val);
 ml_internal_fun1 (alloc_Elf_Scn, str_section, Elf_val);
 ml_fun1 (Val_int, elf_kind, Elf_val);
 ml_fun1 (copy_string, elf_errmsg, Int_val);
@@ -747,11 +745,4 @@ CAMLprim value caml_elf_program_header_flags (value e, value ec, value f)
   CAMLreturn (Val_unit);
 }
 
-CAMLprim value caml_elf_ends (value e)
-{
-  CAMLparam1 (e);
-  Elf* elf = Elf_val (e);
-  elf_end (elf);
-  CAMLreturn (Val_unit);
-}
 
