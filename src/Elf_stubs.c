@@ -79,11 +79,17 @@ static inline Elf* handle_null_option (value option) {
   }
   
 Decl_null_option (Elf)
+Decl_null_option (Elf_Scn)
 
 #define ml_fun1(ret, name, arg1)                            \
   CAMLprim value caml_##name (value _a1) {                  \
     CAMLparam1 (_a1);                                       \
     CAMLreturn (ret (name (arg1 (_a1)))); }
+
+#define ml_fun2(ret, name, arg1, arg2)                                \
+  CAMLprim value caml_##name (value _a1, value _a2) {                 \
+    CAMLparam2 (_a1, _a2);                                            \
+    CAMLreturn (ret (name (arg1 (_a1), arg2 (_a2)))); }
 
 #define ml_fun3(ret, name, arg1, arg2, arg3)                           \
   CAMLprim value caml_##name (value _a1, value _a2, value _a3) {       \
@@ -93,27 +99,29 @@ Decl_null_option (Elf)
 #define ml_internal_fun1(ret, name, arg1)                           \
   CAMLprim value caml_##name (value _a1) {                          \
     CAMLparam1 (_a1);                                               \
-    CAMLreturn (ret (caml_internal_##name (arg1 (_a1)))); }
+    CAMLreturn (ret (caml_##name##_internal (arg1 (_a1)))); }
 
 #define ml_internal_fun3(ret, name, arg1, arg2, arg3)                   \
   CAMLprim value caml_##name (value _a1, value _a2, value _a3) {        \
     CAMLparam3 (_a1, _a2, _a3);                                         \
     CAMLreturn (ret (caml_internal_##name (arg1 (_a1), arg2 (_a2), arg3 (_a3)))); }
 
-CAMLprim Elf_Scn* caml_internal_str_section (Elf* elf) {
+CAMLprim size_t caml_elf_getshdrstrndx_internal (Elf* elf) {
   size_t shstrndx;
   if (elf_getshdrstrndx (elf, &shstrndx) != 0)
     elf_error ("elf_getshdrstrndx");
-  return elf_getscn (elf, shstrndx);
+  return shstrndx;
 }
 
 #define Val_unit2(_a) Val_unit
 ml_fun1 (Val_int, elf_version, Int_val);
 ml_fun3 (null_option_Elf, elf_begin, Int_val, Int_val, handle_null_option);
 ml_fun1 (Val_unit2, elf_end, Elf_val);
-ml_internal_fun1 (alloc_Elf_Scn, str_section, Elf_val);
-ml_fun1 (Val_int, elf_kind, Elf_val);
 ml_fun1 (copy_string, elf_errmsg, Int_val);
+ml_fun1 (Val_int, elf_kind, Elf_val);
+ml_fun2 (null_option_Elf_Scn, elf_getscn, Elf_val, Int_val);
+ml_internal_fun1 (Val_int, elf_getshdrstrndx, Elf_val);
+
 //ml_fun1 (alloc_Elf32_Shdr, gelf_getshdr, Elf_Scn_val);
 //ml_fun3 (alloc_string, elf_strptr, Elf_val, Int_val, String_val);
 
