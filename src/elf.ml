@@ -160,16 +160,16 @@ type off = Int64.t
 type size = Int64.t
 type word = Int32.t
 type half = int
-(* type elf = { *)
-(*   elf_header: ehdr; *)
-(*   program_header: phdr option; *)
-(*   sections: section list *)
-(* } *)
-(* and section = { *)
-(*   section_header: shdr; *)
-(*   section_data: data; *)
-(* }     *)
-type ehdr = {
+type ('a, 'b) elf_image = {
+  elf_header: ehdr;
+  program_header: phdr option;
+  sections: ('a, 'b) section_entry list
+}
+and ('a, 'b) section_entry = {
+  section_header: shdr;
+  section_data: ('a, 'b) data;
+}
+and ehdr = {
   e_ident     : elf_ident;
   e_type      : elf_type;
   e_machine   : machine;
@@ -345,6 +345,11 @@ and elf_flags =
   | F_LAYOUT
   | F_LAYOUT_OVERLAP
 
+let int_of_flag = function
+  | F_DIRTY -> 0x1
+  | F_LAYOUT -> 0x4
+  | F_LAYOUT_OVERLAP -> 0x10000000
+
 external elf_version : int -> int = "caml_elf_version"
 let version v = elf_version (int_of_ev v) |> ev_of_int
 external begins : Unix.file_descr -> elf_cmd -> elf option -> elf option = "caml_elf_begin"
@@ -363,9 +368,10 @@ external program_header : elf -> elf32_phdr = "caml_elf_ph"
 external create_section : elf -> section = "caml_elf_newscn"
 external create_data : section -> elf32_data = "caml_elf_newdata"
 external set_str_section_index : elf -> int -> unit = "caml_elf_set_str_section_index"
-external update : elf -> elf_cmd -> unit = "caml_elf_update"
-external fsize : dtype -> int32 -> version -> int = "caml_elf_fsize"
-external program_header_flags : elf -> elf_cmd -> elf_flags -> unit = "caml_elf_program_header_flags"
+external update : elf -> elf_cmd -> int = "caml_elf_update"
+external fsize : dtype -> int32 -> version -> int = "caml_elf32_fsize"
+external flagphdr_internal : elf -> elf_cmd -> int -> unit = "caml_elf_flagphdr"
+let flagphdr elf cmd flag = flagphdr_internal elf cmd (int_of_flag flag)
 
 let section_data section =
   let size = section_size section in
@@ -629,18 +635,19 @@ let _ = Callback.register_exception "Elf.Elf_error" (Elf_error ("",""))
 let err x = failwith (Printf.fprintf stderr x (errmsg (-1)))
 
 (* let read file_name = *)
-(*   match Elf.version `CURRENT with *)
-(*     | `NONE -> err "Elf.version" *)
-(*     | _ ->  *)
-(*       begin  *)
+(*   match version `CURRENT with *)
+(*     | `NONE -> err "version" *)
+(*     | _ -> *)
+(*       begin *)
 (*         let fd = Unix.openfile file_name [Unix.O_RDONLY] 0 in *)
-(*         match Elf.begins fd Elf.C_READ None with *)
-(*             | None -> err "Elfbegins" *)
-(*             | Some elf ->  *)
+(*         match begins fd C_READ None with *)
+(*             | None -> err "begins" *)
+(*             | Some elf -> *)
 (*               begin *)
 (*                 match kind with *)
-(*                   | Elf.K_ELF -> begin *)
+(*                   | K_ELF -> begin *)
 (*                     let ehdr = Elf32Header.get (elf32_header elf) in *)
-(*                     let sections = Elf.sections elf in  *)
-(*                     let data = Elf.section_data str_section in *)
-
+(*                     let sections = sections elf in *)
+(*                     let data = section_data str_section in *)
+(*                     { elf_header = Elf32Header.create elf; *)
+                      
