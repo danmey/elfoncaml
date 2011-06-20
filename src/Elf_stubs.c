@@ -11,6 +11,7 @@
 #include <libelf.h>
 #include <gelf.h>
 #include <string.h>
+#include <stdio.h>
 
 static struct custom_operations elf_ops = {
   "org.danmey",
@@ -60,43 +61,51 @@ static void elf_error (char *cmdname) {
   mlraise(res);
 }
 
-CAMLprim value caml_elf_version (value version) {
-  CAMLparam1 (version);
-  CAMLreturn (Val_int (elf_version (Int_val (version))));
-}
-
-static inline void* handle_null_option (value option) {
+static inline Elf* handle_null_option (value option) {
   if (Is_block (option))
-    return (void*)Field (option, 0);
+    return Elf_val (Field (option, 0));
   return 0;
 }
-
-static inline value null_option (value ptr)
-{
-  value option = Val_int (0);
-  if (ptr) {
-    option = caml_alloc_small (2, 0);
-    Field(option, 0) = Val_int(1);
-    Field(option, 1) = ptr;
+#define string char
+#define Decl_named_null_option(name, conv)                \
+  static inline value Val_option_##name (name* ptr)        \
+  {                                                       \
+    value option = Val_int (0);                           \
+    if (ptr) {                                           \
+      option = caml_alloc_small (1, 1);                  \
+      Field(option, 0) = conv (ptr);             \
+    }                                                    \
+    return option;                                       \
   }
-  return option;
-}
 
-#define Val_null_option(conv, ptr) null_option (conv (ptr))
-  
+#define Decl_null_option(typ) Decl_named_null_option(typ, alloc_##typ)
+
+Decl_null_option (Elf)
+Decl_null_option (Elf_Scn)
+Decl_named_null_option (string, copy_string)
 #define ml_fun1(ret, name, arg1)                            \
-  CAMLprim value caml_##name (value _a1) {                          \
-    CAMLparam1 (_a1); \
+  CAMLprim value caml_##name (value _a1) {                  \
+    CAMLparam1 (_a1);                                       \
     CAMLreturn (ret (name (arg1 (_a1)))); }
 
-#define ml_internal_fun1(ret, name, arg1)                            \
-  CAMLprim value caml_##name (value _a1) {                          \
-    CAMLparam1 (_a1); \
-    CAMLreturn (ret (caml_internal_##name (arg1 (_a1)))); }
+#define ml_fun2(ret, name, arg1, arg2)                                \
+  CAMLprim value caml_##name (value _a1, value _a2) {                 \
+    CAMLparam2 (_a1, _a2);                                            \
+    CAMLreturn (ret (name (arg1 (_a1), arg2 (_a2)))); }
 
-#define ml_internal_fun3(ret, name, arg1, arg2, arg3)                            \
-  CAMLprim value caml_##name (value _a1, value _a2, value _a3) {                          \
-    CAMLparam3 (_a1, _a2, _a3); \
+#define ml_fun3(ret, name, arg1, arg2, arg3)                           \
+  CAMLprim value caml_##name (value _a1, value _a2, value _a3) {       \
+    CAMLparam3 (_a1, _a2, _a3);                                        \
+    CAMLreturn (ret (name (arg1 (_a1), arg2 (_a2), arg3 (_a3)))); }
+
+#define ml_internal_fun1(ret, name, arg1)                           \
+  CAMLprim value caml_##name (value _a1) {                          \
+    CAMLparam1 (_a1);                                               \
+    CAMLreturn (ret (caml_##name##_internal (arg1 (_a1)))); }
+
+#define ml_internal_fun3(ret, name, arg1, arg2, arg3)                   \
+  CAMLprim value caml_##name (value _a1, value _a2, value _a3) {        \
+    CAMLparam3 (_a1, _a2, _a3);                                         \
     CAMLreturn (ret (caml_internal_##name (arg1 (_a1), arg2 (_a2), arg3 (_a3)))); }
     
 CAMLprim Elf* caml_internal_elf_begin (int fd, int cmd, Elf* ref) {
@@ -106,16 +115,23 @@ CAMLprim Elf* caml_internal_elf_begin (int fd, int cmd, Elf* ref) {
   return elf;
 }
 
-CAMLprim Elf_Scn* caml_internal_str_section (Elf* elf) {
+CAMLprim Elf_Scn* caml_elf_getshdrstrndx_internal (Elf* elf) {
   size_t shstrndx;
   if (elf_getshdrstrndx (elf, &shstrndx) != 0)
     elf_error ("elf_getshdrstrndx");
-  return elf_getscn (elf, shstrndx);
+  return shstrndx;
 }
 
-ml_internal_fun3 (alloc_Elf, elf_begin, Int_val, Int_val, handle_null_option);
-ml_internal_fun1 (alloc_Elf_Scn, str_section, Elf_val);
+#define Val_unit2(_a) Val_unit
+ml_fun1 (Val_int, elf_version, Int_val);
+ml_fun3 (Val_option_Elf, elf_begin, Int_val, Int_val, handle_null_option);
+ml_fun1 (Val_unit2, elf_end, Elf_val);
+ml_fun1 (copy_string, elf_errmsg, Int_val);
 ml_fun1 (Val_int, elf_kind, Elf_val);
+ml_fun2 (Val_option_Elf_Scn, elf_getscn, Elf_val, Int_val);
+ml_internal_fun1 (Val_int, elf_getshdrstrndx, Elf_val);
+ml_fun1 (Val_int, elf_ndxscn, Elf_Scn_val);
+
 //ml_fun1 (alloc_Elf32_Shdr, gelf_getshdr, Elf_Scn_val);
 //ml_fun3 (alloc_string, elf_strptr, Elf_val, Int_val, String_val);
 
@@ -683,10 +699,8 @@ value build_ba (void *x)
 {
   CAMLparam0();
   CAMLlocal1(option);
-  option = Val_int(0);
-  /* option = caml_alloc_small (2, 0); */
-  /* Field(option, 0) = Val_int(1); */
-  //  Field(option, 1) = caml_ba_alloc(CAML_BA_UINT8|CAML_BA_C_LAYOUT|CAML_BA_EXTERNAL, 1, x, 0);
+  option = caml_alloc_small (1, 1);
+  Field(option, 0) = caml_ba_alloc(CAML_BA_UINT8|CAML_BA_C_LAYOUT|CAML_BA_EXTERNAL, 1, x, 0);
   CAMLreturn (option);
 }
 
@@ -749,11 +763,4 @@ CAMLprim value caml_elf_program_header_flags (value e, value ec, value f)
   CAMLreturn (Val_unit);
 }
 
-CAMLprim value caml_elf_ends (value e)
-{
-  CAMLparam1 (e);
-  Elf* elf = Elf_val (e);
-  elf_end (elf);
-  CAMLreturn (Val_unit);
-}
 
