@@ -24,7 +24,7 @@ let _ =
                       List.iter 
                         (fun sec -> 
                           Printf.printf "Section %-4.4d %s\n" 
-                            (Elf.section_index sec) 
+                            (Elf.ndxscn sec) 
                             (Elf.section_name elf sec str_section)) sections;
                       (* Printf.printf ".shstrab: size = %d\n" (Elf.section_size str_section); *)
                       let data = Elf.section_data str_section in

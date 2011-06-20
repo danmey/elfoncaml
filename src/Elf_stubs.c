@@ -140,6 +140,7 @@ ml_fun3 (Val_int, elf_flagscn , Elf_Scn, Int, Int);
 ml_fun3 (Val_int, elf_flagshdr, Elf_Scn, Int, Int);
 ml_fun3 (Val_int, elf32_fsize, Int, Int32, Int);
 ml_fun2 (Val_int, elf_update, Elf, Int);
+ml_fun1 (Val_option_Elf_Scn, elf_newscn, Elf)
 
 //ml_fun1 (alloc_Elf32_Shdr, gelf_getshdr, Elf_Scn_val);
 //ml_fun3 (alloc_string, elf_strptr, Elf_val, Int_val, String_val);
@@ -179,11 +180,6 @@ CAMLprim value caml_elf_section_name (value elf, value section, value str_sectio
   if (!name)
     elf_error ("gelf_strptr");
   CAMLreturn (copy_string (name));
-}
-
-CAMLprim value caml_elf_section_index (value section) {
-  CAMLparam1 (section);
-  CAMLreturn (Val_int (elf_ndxscn (Elf_Scn_val (section))));
 }
 
 CAMLprim value caml_elf_section_size (value section) {
@@ -670,13 +666,6 @@ CAMLprim value caml_elf_sh_get (value shdr)
   Field (elf_shdr, 9) = copy_int32 (hdr->sh_entsize);
   Field (elf_shdr, 10) = shdr;
   CAMLreturn (elf_shdr);
-}
-
-CAMLprim value caml_elf_newscn (value elf)
-{
-  CAMLparam1 (elf);
-  Elf_Scn* scn = elf_newscn (Elf_val (elf));
-  CAMLreturn (alloc_Elf_Scn (scn));
 }
 
 CAMLprim value caml_elf_newdata (value scn)
