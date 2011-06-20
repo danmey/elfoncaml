@@ -160,7 +160,16 @@ type off = Int64.t
 type size = Int64.t
 type word = Int32.t
 type half = int
-type elf_header = {
+(* type elf = { *)
+(*   elf_header: ehdr; *)
+(*   program_header: phdr option; *)
+(*   sections: section list *)
+(* } *)
+(* and section = { *)
+(*   section_header: shdr; *)
+(*   section_data: data; *)
+(* }     *)
+type ehdr = {
   e_ident     : elf_ident;
   e_type      : elf_type;
   e_machine   : machine;
@@ -252,7 +261,7 @@ and pt =
   | PT_HIOS
   | PT_LOPROC
   | PT_HIPROC
-and scnhdr = {
+and shdr = {
     sh_name		:word;
     sh_type		:sh_type;
     sh_flags		:sh_flags list;
@@ -344,7 +353,7 @@ external errmsg : int -> string = "caml_elf_errmsg"
 external kind : elf -> elf_kind = "caml_elf_kind"
 external getshdrstrndx : elf -> int = "caml_elf_getshdrstrndx"
 external getscn : elf -> int -> section option = "caml_elf_getscn"
-(* external sections : elf -> section list = "caml_elf_sections" *)
+external sections : elf -> section list = "caml_elf_sections"
 external section_name : elf -> section -> section -> string = "caml_elf_section_name"
 external section_index : section -> int = "caml_elf_section_index"
 external section_size : section -> int = "caml_elf_section_size"
@@ -366,7 +375,7 @@ let section_data section =
 
 let ei_nident = 16
 module type HEADER = sig
-  type t = elf_header
+  type t = ehdr
   type native_t
   val create : elf -> t
   val put : t -> native_t -> unit
@@ -375,7 +384,7 @@ module type HEADER = sig
 end
 
 module Elf32Header = struct
-  type t = elf_header
+  type t = ehdr
   type native_t = elf32_ehdr
   external put : native_t -> t -> unit = "caml_elf_elf32_put"
   external get : native_t -> t = "caml_elf_elf32_get"
@@ -467,7 +476,6 @@ module Elf32Header = struct
       | `I860 -> "Intel 80860"
       | `MIPS -> "MIPS I Architecture"
       | `S370 -> "IBM System)370 Processor"
-      | `MIPS -> "MIPS RS3000 Little-endian"
       | `SPARC64 -> "SPARC 64-bit"
       | `PARISC -> "Hewlett-Packard PA-RISC"
       | `VPP500 -> "Fujitsu VPP500"
@@ -487,11 +495,8 @@ module Elf32Header = struct
       | `TRICORE -> "Siemens TriCore embedded processor"
       | `ARC -> "Argonaut RISC Core, Argonaut Technologies Inc."
       | `H8 -> "Hitachi H8)300"
-      | `H8 -> "Hitachi H8)300H"
       | `H8S -> "Hitachi H8S"
-      | `H8 -> "Hitachi H8)500"
       | `IA -> "Intel IA-64 processor architecture"
-      | `MIPS -> "Stanford MIPS-X"
       | `COLDFIRE -> "Motorola ColdFire"
       | `M68HC12 -> "Motorola M68HC12"
       | `MMA -> "Fujitsu MMA Multimedia Accelerator"
@@ -532,7 +537,6 @@ module Elf32Header = struct
       | `MN10200 -> "Matsushita MN10200"
       | `PJ -> "picoJava"
       | `OPENRISC -> "OpenRISC 32-bit embedded processor"
-      | `ARC -> "ARC Cores Tangent-A5"
       | `XTENSA -> "Tensilica Xtensa Architecture"
       | `VIDEOCORE -> "Alphamosaic VideoCore processor"
       | `TMM -> "Thompson Multimedia General Purpose Processor"
@@ -594,7 +598,7 @@ end
 
 module SectionHeader = struct
   type native_t = section
-  type t = scnhdr
+  type t = shdr
   external elf32_getshdr : section -> native_t = "caml_elf_elf32_getshdr"
   external put : native_t -> t -> unit = "caml_elf_sh_put"
   external get : native_t -> t = "caml_elf_sh_get"
@@ -622,3 +626,21 @@ end
 
 exception Elf_error of string * string
 let _ = Callback.register_exception "Elf.Elf_error" (Elf_error ("",""))
+let err x = failwith (Printf.fprintf stderr x (errmsg (-1)))
+
+(* let read file_name = *)
+(*   match Elf.version `CURRENT with *)
+(*     | `NONE -> err "Elf.version" *)
+(*     | _ ->  *)
+(*       begin  *)
+(*         let fd = Unix.openfile file_name [Unix.O_RDONLY] 0 in *)
+(*         match Elf.begins fd Elf.C_READ None with *)
+(*             | None -> err "Elfbegins" *)
+(*             | Some elf ->  *)
+(*               begin *)
+(*                 match kind with *)
+(*                   | Elf.K_ELF -> begin *)
+(*                     let ehdr = Elf32Header.get (elf32_header elf) in *)
+(*                     let sections = Elf.sections elf in  *)
+(*                     let data = Elf.section_data str_section in *)
+

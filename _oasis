@@ -25,6 +25,14 @@ Executable prog1
   BuildTools:     ocamlbuild
   Install:        false
 
+Executable prog2
+  Path:           examples  
+  MainIs:         prog2.ml
+  CompiledObject: best
+  BuildDepends:   elfoncaml, unix
+  BuildTools:     ocamlbuild
+  Install:        false
+
 Executable prog4
   Path:           examples  
   MainIs:         prog4.ml
