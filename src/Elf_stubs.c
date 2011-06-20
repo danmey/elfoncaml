@@ -113,8 +113,8 @@ Decl_named_null_option (string, copy_string)
   CAMLprim value caml_##name (value _a1, value _a2, value _a3) {        \
     CAMLparam3 (_a1, _a2, _a3);                                         \
     CAMLreturn (ret (caml_internal_##name (arg1##_val (_a1), arg2##_val (_a2), arg3##_val (_a3)))); }
-
-CAMLprim size_t caml_elf_getshdrstrndx_internal (Elf* elf) {
+    
+CAMLprim int caml_elf_getshdrstrndx_internal (Elf* elf) {
   size_t shstrndx;
   if (elf_getshdrstrndx (elf, &shstrndx) != 0)
     elf_error ("elf_getshdrstrndx");
