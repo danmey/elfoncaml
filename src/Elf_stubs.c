@@ -93,32 +93,32 @@ Decl_Val_named_option (string, copy_string)
 #define ml_fun0(ret, name)                                  \
   CAMLprim value caml_##name () {                           \
     CAMLparam0 ();                                          \
-    CAMLreturn (ret (name ())); }
+    CAMLreturn (Val_ ## ret (name ())); }
 
 #define ml_fun1(ret, name, arg1)                            \
   CAMLprim value caml_##name (value _a1) {                  \
     CAMLparam1 (_a1);                                       \
-    CAMLreturn (ret (name (arg1##_val (_a1)))); }
+    CAMLreturn (Val_ ## ret (name (arg1##_val (_a1)))); }
 
 #define ml_fun2(ret, name, arg1, arg2)                                \
   CAMLprim value caml_##name (value _a1, value _a2) {                 \
     CAMLparam2 (_a1, _a2);                                            \
-    CAMLreturn (ret (name (arg1##_val (_a1), arg2##_val (_a2)))); }
+    CAMLreturn (Val_ ## ret (name (arg1##_val (_a1), arg2##_val (_a2)))); }
 
 #define ml_fun3(ret, name, arg1, arg2, arg3)                           \
   CAMLprim value caml_##name (value _a1, value _a2, value _a3) {       \
     CAMLparam3 (_a1, _a2, _a3);                                        \
-    CAMLreturn (ret (name (arg1##_val (_a1), arg2##_val (_a2), arg3##_val (_a3)))); }
+    CAMLreturn (Val_ ## ret (name (arg1##_val (_a1), arg2##_val (_a2), arg3##_val (_a3)))); }
 
 #define ml_internal_fun1(ret, name, arg1)                           \
   CAMLprim value caml_##name (value _a1) {                          \
     CAMLparam1 (_a1);                                               \
-    CAMLreturn (ret (caml_##name##_internal (arg1##_val (_a1)))); }
+    CAMLreturn (Val_ ## ret (caml_##name##_internal (arg1##_val (_a1)))); }
 
 #define ml_internal_fun3(ret, name, arg1, arg2, arg3)                   \
   CAMLprim value caml_##name (value _a1, value _a2, value _a3) {        \
     CAMLparam3 (_a1, _a2, _a3);                                         \
-    CAMLreturn (ret (caml_internal_##name (arg1##_val (_a1), arg2##_val (_a2), arg3##_val (_a3)))); }
+    CAMLreturn (Val_ ## ret (caml_internal_##name (arg1##_val (_a1), arg2##_val (_a2), arg3##_val (_a3)))); }
     
 CAMLprim int caml_elf_getshdrstrndx_internal (Elf* elf) {
   size_t shstrndx;
@@ -127,28 +127,30 @@ CAMLprim int caml_elf_getshdrstrndx_internal (Elf* elf) {
   return shstrndx;
 }
 
-
+#define Val_copy_string copy_string
 #define Val_unit2(_a) Val_unit
-ml_fun3 (Val_Elf_option, elf_begin, Int, Int, Elf_option);
-ml_fun2 (Val_unit2, elf_cntl, Int, Elf_option);
-ml_fun1 (Val_unit2, elf_end, Elf);
+ml_fun3 (Elf_option, elf_begin, Int, Int, Elf_option);
+ml_fun2 (unit2, elf_cntl, Int, Elf_option);
+ml_fun1 (unit2, elf_end, Elf);
 ml_fun1 (copy_string, elf_errmsg, Int);
-ml_fun0 (Val_int, elf_errno);
-ml_fun1 (Val_int, elf_kind, Elf);
-ml_fun2 (Val_Elf_Scn_option, elf_getscn, Elf, Int);
-ml_internal_fun1 (Val_int, elf_getshdrstrndx, Elf);
-ml_fun1 (Val_int, elf_ndxscn, Elf_Scn);
-ml_fun1 (Val_int, elf_version, Int);
-ml_fun3 (Val_int, elf_flagdata, Elf_Data, Int, Int);
-ml_fun3 (Val_int, elf_flagehdr, Elf, Int, Int);
-ml_fun3 (Val_int, elf_flagelf,  Elf, Int, Int);
-ml_fun3 (Val_int, elf_flagphdr, Elf, Int, Int);
-ml_fun3 (Val_int, elf_flagscn , Elf_Scn, Int, Int);
-ml_fun3 (Val_int, elf_flagshdr, Elf_Scn, Int, Int);
-ml_fun3 (Val_int, elf32_fsize, Int, Int32, Int);
-ml_fun2 (Val_int, elf_update, Elf, Int);
-ml_fun1 (Val_Elf_Scn_option, elf_newscn, Elf)
-ml_fun2 (Val_Elf_Scn_option, elf_nextscn, Elf, Elf_Scn_option)
+ml_fun0 (int, elf_errno);
+ml_fun1 (int, elf_kind, Elf);
+ml_fun2 (Elf_Scn_option, elf_getscn, Elf, Int);
+ml_internal_fun1 (int, elf_getshdrstrndx, Elf);
+ml_fun1 (int, elf_ndxscn, Elf_Scn);
+ml_fun1 (int, elf_version, Int);
+ml_fun3 (int, elf_flagdata, Elf_Data, Int, Int);
+ml_fun3 (int, elf_flagehdr, Elf, Int, Int);
+ml_fun3 (int, elf_flagelf,  Elf, Int, Int);
+ml_fun3 (int, elf_flagphdr, Elf, Int, Int);
+ml_fun3 (int, elf_flagscn , Elf_Scn, Int, Int);
+ml_fun3 (int, elf_flagshdr, Elf_Scn, Int, Int);
+ml_fun3 (int, elf32_fsize, Int, Int32, Int);
+ml_fun2 (int, elf_update, Elf, Int);
+ml_fun1 (Elf_Scn_option, elf_newscn, Elf)
+ml_fun2 (Elf_Scn_option, elf_nextscn, Elf, Elf_Scn_option)
+#undef Val_copy_string
+
 //ml_fun1 (alloc_Elf32_Shdr, gelf_getshdr, Elf_Scn_val);
 //ml_fun3 (alloc_string, elf_strptr, Elf_val, Int_val, String_val);
 
