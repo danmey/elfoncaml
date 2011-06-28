@@ -61,16 +61,15 @@ static void elf_error (char *cmdname) {
   mlraise(res);
 }
 
-#define Decl_null_option_val(name)                      \
+#define Decl_option_val(name)                            \
   static inline name* name##_option_val (value option) { \
     if (Is_block (option))                               \
       return name##_val (Field (option, 0));             \
     return 0;                                            \
   }
 
-#define string char
-#define Decl_named_null_option(name, conv)                 \
-  static inline value Val_option_##name (name* ptr)        \
+#define Decl_Val_named_option(name, conv)                  \
+  static inline value Val_##name##_option (name* ptr)      \
   {                                                        \
     value option = Val_int (0);                            \
     if (ptr) {                                             \
@@ -80,14 +79,16 @@ static void elf_error (char *cmdname) {
     return option;                                         \
   }
 
-#define Decl_null_option(typ) Decl_named_null_option(typ, alloc_##typ)
+#define Decl_Val_option(typ) Decl_Val_named_option(typ, alloc_##typ)
 
-Decl_null_option (Elf)
-Decl_null_option (Elf_Scn)
-Decl_null_option_val (Elf)
-Decl_null_option_val (Elf_Scn)
+Decl_Val_option (Elf)
+Decl_Val_option (Elf_Scn)
+Decl_option_val (Elf)
+Decl_option_val (Elf_Scn)
 
-Decl_named_null_option (string, copy_string)
+#define string char
+Decl_Val_named_option (string, copy_string)
+#undef string
 
 #define ml_fun0(ret, name)                                  \
   CAMLprim value caml_##name () {                           \
@@ -128,13 +129,13 @@ CAMLprim int caml_elf_getshdrstrndx_internal (Elf* elf) {
 
 
 #define Val_unit2(_a) Val_unit
-ml_fun3 (Val_option_Elf, elf_begin, Int, Int, Elf_option);
+ml_fun3 (Val_Elf_option, elf_begin, Int, Int, Elf_option);
 ml_fun2 (Val_unit2, elf_cntl, Int, Elf_option);
 ml_fun1 (Val_unit2, elf_end, Elf);
 ml_fun1 (copy_string, elf_errmsg, Int);
 ml_fun0 (Val_int, elf_errno);
 ml_fun1 (Val_int, elf_kind, Elf);
-ml_fun2 (Val_option_Elf_Scn, elf_getscn, Elf, Int);
+ml_fun2 (Val_Elf_Scn_option, elf_getscn, Elf, Int);
 ml_internal_fun1 (Val_int, elf_getshdrstrndx, Elf);
 ml_fun1 (Val_int, elf_ndxscn, Elf_Scn);
 ml_fun1 (Val_int, elf_version, Int);
@@ -146,8 +147,8 @@ ml_fun3 (Val_int, elf_flagscn , Elf_Scn, Int, Int);
 ml_fun3 (Val_int, elf_flagshdr, Elf_Scn, Int, Int);
 ml_fun3 (Val_int, elf32_fsize, Int, Int32, Int);
 ml_fun2 (Val_int, elf_update, Elf, Int);
-ml_fun1 (Val_option_Elf_Scn, elf_newscn, Elf)
-ml_fun2 (Val_option_Elf_Scn, elf_nextscn, Elf, Elf_Scn_option)
+ml_fun1 (Val_Elf_Scn_option, elf_newscn, Elf)
+ml_fun2 (Val_Elf_Scn_option, elf_nextscn, Elf, Elf_Scn_option)
 //ml_fun1 (alloc_Elf32_Shdr, gelf_getshdr, Elf_Scn_val);
 //ml_fun3 (alloc_string, elf_strptr, Elf_val, Int_val, String_val);
 
