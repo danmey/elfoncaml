@@ -151,28 +151,6 @@ ml_fun2 (Val_option_Elf_Scn, elf_nextscn, Elf, Elf_Scn_option)
 //ml_fun1 (alloc_Elf32_Shdr, gelf_getshdr, Elf_Scn_val);
 //ml_fun3 (alloc_string, elf_strptr, Elf_val, Int_val, String_val);
 
-CAMLprim value caml_elf_sections (value e) {
-  CAMLparam1 (e);
-  CAMLlocal2 (list, node);
-  Elf* elf = Elf_val (e);
-  Elf_Scn* scn = 0;
-  scn = elf_nextscn (elf , scn);
-  if (!scn)
-    CAMLreturn (Val_int (0));
-  list = caml_alloc_small(2, 0);
-  node = list;
-  while (scn) {
-    Field(node, 0) = alloc_Elf_Scn (scn);
-    scn = elf_nextscn (elf , scn);
-    if (scn != 0) {
-      Field(node, 1) = caml_alloc_small(2, 0);
-      node = Field(node, 1);
-    } else {
-        Field(node, 1) = Val_int (0);
-      }
-  }
-  CAMLreturn (list);
-}
 
 CAMLprim value caml_elf_section_name (value elf, value section, value str_section) {
   CAMLparam3 (elf, section, str_section);

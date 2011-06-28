@@ -358,7 +358,6 @@ external errmsg : int -> string = "caml_elf_errmsg"
 external kind : elf -> elf_kind = "caml_elf_kind"
 external getshdrstrndx : elf -> int = "caml_elf_getshdrstrndx"
 external getscn : elf -> int -> section option = "caml_elf_getscn"
-external sections : elf -> section list = "caml_elf_sections"
 external section_name : elf -> section -> section -> string = "caml_elf_section_name"
 external ndxscn : section -> int = "caml_elf_ndxscn"
 external section_size : section -> int = "caml_elf_section_size"
@@ -371,7 +370,16 @@ external set_str_section_index : elf -> int -> unit = "caml_elf_set_str_section_
 external update : elf -> elf_cmd -> int = "caml_elf_update"
 external fsize : dtype -> int32 -> version -> int = "caml_elf32_fsize"
 external flagphdr_internal : elf -> elf_cmd -> int -> unit = "caml_elf_flagphdr"
+external nextscn : elf -> section option -> section option = "caml_elf_nextscn"
+
 let flagphdr elf cmd flag = flagphdr_internal elf cmd (int_of_flag flag)
+
+let rec sections elf =
+  let rec loop = function
+    | None -> []
+    | Some scn -> scn :: loop (nextscn elf (Some scn))
+  in
+  loop (nextscn elf None)
 
 let section_data section =
   let size = section_size section in
