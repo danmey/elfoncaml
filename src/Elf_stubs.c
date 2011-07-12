@@ -152,6 +152,7 @@ ml_fun1 (Elf_Scn_option, elf_newscn, Elf)
 ml_fun2 (Elf_Scn_option, elf_nextscn, Elf, Elf_Scn_option)
 ml_fun2 (unit2, elfx_update_shstrndx, Elf, Int)
 ml_fun2 (Elf32_Phdr, elf32_newphdr, Elf, Int)
+ml_fun1 (Elf32_Ehdr, elf32_newehdr, Elf);
 
 #undef Val_copy_string
 
@@ -198,11 +199,12 @@ CAMLprim value caml_elf_section_data_fill (value section, value bigarray) {
   CAMLreturn (Val_unit);
 }
 
-CAMLprim value caml_elf_elf32_header (value elf) {
-  CAMLparam1 (elf);
-  Elf32_Ehdr* v = elf32_newehdr (Elf_val (elf));
-  if (!v) elf_error ("elf32_newehdr");
-  CAMLreturn (alloc_Elf32_Ehdr (v));
+
+CAMLprim value caml_elf_newdata (value scn)
+{
+  CAMLparam1 (scn);
+  Elf_Data* data = elf_newdata (Elf_Scn_val (scn));
+  CAMLreturn (alloc_Elf_Data (data));
 }
 
 #define Variant(name) { #name, EM_##name, 0}
@@ -652,12 +654,6 @@ CAMLprim value caml_elf_sh_get (value shdr)
   CAMLreturn (elf_shdr);
 }
 
-CAMLprim value caml_elf_newdata (value scn)
-{
-  CAMLparam1 (scn);
-  Elf_Data* data = elf_newdata (Elf_Scn_val (scn));
-  CAMLreturn (alloc_Elf_Data (data));
-}
 
 CAMLprim value caml_elf_data_put (value elf_data, value data)
 {

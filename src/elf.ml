@@ -362,7 +362,7 @@ external section_name : elf -> section -> section -> string = "caml_elf_section_
 external ndxscn : section -> int = "caml_elf_ndxscn"
 external section_size : section -> int = "caml_elf_section_size"
 external section_data_fill : section -> section_data -> unit = "caml_elf_section_data_fill"
-external elf32_header : elf -> elf32_ehdr = "caml_elf_elf32_header"
+external newehdr : elf -> elf32_ehdr = "elf32_newehdr"
 external program_header : elf -> elf32_phdr = "caml_elf32_newphdr"
 external newscn : elf -> section option = "caml_elf_newscn"
 external create_data : section -> elf32_data = "caml_elf_newdata"
@@ -404,7 +404,7 @@ module Elf32Header = struct
   external get : native_t -> t = "caml_elf_elf32_get"
 
   let create elf =
-    let hdr = elf32_header elf in
+    let hdr = newehdr elf in
     get hdr
 
   let update hdr =
