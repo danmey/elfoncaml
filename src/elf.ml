@@ -153,6 +153,8 @@ type elf32_ehdr
 type elf32_phdr
 type elf32_shdr
 type elf32_data
+type gelf_shdr
+type elf_scn
 module SectionBuffer = Bigarray.Array1
 
 type addr = Int64.t
@@ -350,6 +352,7 @@ let int_of_flag = function
   | F_LAYOUT -> 0x4
   | F_LAYOUT_OVERLAP -> 0x10000000
 
+
 external version : int -> int = "caml_elf_version"
 let version v = version (int_of_ev v) |> ev_of_int
 external begins : Unix.file_descr -> elf_cmd -> elf option -> elf option = "caml_elf_begin"
@@ -357,10 +360,8 @@ external ends : elf -> unit = "caml_elf_end"
 external errmsg : int -> string = "caml_elf_errmsg"
 external kind : elf -> elf_kind = "caml_elf_kind"
 external getshdrstrndx : elf -> int = "caml_elf_getshdrstrndx"
-external getscn : elf -> int -> section option = "caml_elf_getscn"
-external section_name : elf -> section -> section -> string = "caml_elf_section_name"
-external ndxscn : section -> int = "caml_elf_ndxscn"
-external section_size : section -> int = "caml_elf_section_size"
+external getscn : elf -> int -> elf_scn option = "caml_elf_getscn"
+external ndxscn : elf_scn -> int = "caml_elf_ndxscn"
 external section_data_fill : section -> section_data -> unit = "caml_elf_section_data_fill"
 external newehdr : elf -> elf32_ehdr = "elf32_newehdr"
 external program_header : elf -> elf32_phdr = "caml_elf32_newphdr"
@@ -369,8 +370,10 @@ external create_data : section -> elf32_data = "caml_elf_newdata"
 external update : elf -> elf_cmd -> int = "caml_elf_update"
 external fsize : dtype -> int32 -> version -> int = "caml_elf32_fsize"
 external flagphdr_internal : elf -> elf_cmd -> int -> unit = "caml_elf_flagphdr"
-external nextscn : elf -> section option -> section option = "caml_elf_nextscn"
+external nextscn : elf -> elf_scn option -> elf_scn option = "caml_elf_nextscn"
 external update_shstrndx : elf -> int -> unit = "caml_elfx_update_shstrndx"
+external strptr : elf -> int -> int -> string option = "caml_elf_strptr"
+external getshdr : elf_scn -> gelf_shdr option = "caml_gelf_getshdr"
 
 let flagphdr elf cmd flag = flagphdr_internal elf cmd (int_of_flag flag)
 
@@ -381,11 +384,11 @@ let rec sections elf =
   in
   loop (nextscn elf None)
 
-let section_data section =
-  let size = section_size section in
-  let ba = Bigarray.Array1.create Bigarray.int8_unsigned Bigarray.c_layout size in
-  section_data_fill section ba;
-  ba
+(* let section_data section = *)
+(*   let size = section_size section in *)
+(*   let ba = Bigarray.Array1.create Bigarray.int8_unsigned Bigarray.c_layout size in *)
+(*   section_data_fill section ba; *)
+(*   ba *)
 
 let ei_nident = 16
 module type HEADER = sig

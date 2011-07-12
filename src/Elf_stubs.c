@@ -84,8 +84,10 @@ static void elf_error (char *cmdname) {
 
 Decl_Val_option (Elf)
 Decl_Val_option (Elf_Scn)
+Decl_Val_option (GElf_Shdr)
 Decl_option_val (Elf)
 Decl_option_val (Elf_Scn)
+Decl_option_val (GElf_Shdr)
 
 #define string char
 Decl_Val_named_option (string, copy_string)
@@ -128,6 +130,17 @@ CAMLprim int caml_elf_getshdrstrndx_internal (Elf* elf) {
   return shstrndx;
 }
 
+/* TODO: Remove leaks, wrap it with a finalizer */
+CAMLprim GElf_Shdr* caml_gelf_getshdr_internal (Elf_Scn* elf_scn) {
+  GElf_Shdr* shdr = malloc (sizeof (GElf_Shdr));
+  if ( gelf_getshdr (elf_scn, shdr) != shdr) {
+    free (shdr);
+    return 0;
+  }
+  return shdr;
+}
+
+
 #define Val_copy_string copy_string
 #define Val_unit2(_a) Val_unit
 ml_fun3 (Elf_option, elf_begin, Int, Int, Elf_option);
@@ -137,7 +150,6 @@ ml_fun1 (copy_string, elf_errmsg, Int);
 ml_fun0 (int, elf_errno);
 ml_fun1 (int, elf_kind, Elf);
 ml_fun2 (Elf_Scn_option, elf_getscn, Elf, Int);
-ml_internal_fun1 (int, elf_getshdrstrndx, Elf);
 ml_fun1 (int, elf_ndxscn, Elf_Scn);
 ml_fun1 (int, elf_version, Int);
 ml_fun3 (int, elf_flagdata, Elf_Data, Int, Int);
@@ -153,34 +165,15 @@ ml_fun2 (Elf_Scn_option, elf_nextscn, Elf, Elf_Scn_option)
 ml_fun2 (unit2, elfx_update_shstrndx, Elf, Int)
 ml_fun2 (Elf32_Phdr, elf32_newphdr, Elf, Int)
 ml_fun1 (Elf32_Ehdr, elf32_newehdr, Elf);
+ml_fun3 (string_option, elf_strptr, Elf, Int, Int)
+
+ml_internal_fun1 (GElf_Shdr_option, gelf_getshdr, Elf_Scn);
+ml_internal_fun1 (int, elf_getshdrstrndx, Elf);
 
 #undef Val_copy_string
 
 //ml_fun1 (alloc_Elf32_Shdr, gelf_getshdr, Elf_Scn_val);
 //ml_fun3 (alloc_string, elf_strptr, Elf_val, Int_val, String_val);
-
-
-CAMLprim value caml_elf_section_name (value elf, value section, value str_section) {
-  CAMLparam3 (elf, section, str_section);
-  GElf_Shdr shdr;
-  if ( gelf_getshdr (Elf_Scn_val (section), &shdr) != &shdr)
-    elf_error ("gelf_getshdr");
-  char* name = elf_strptr
-    (Elf_val (elf),
-     elf_ndxscn (Elf_Scn_val (str_section)),
-     shdr.sh_name);
-  if (!name)
-    elf_error ("gelf_strptr");
-  CAMLreturn (copy_string (name));
-}
-
-CAMLprim value caml_elf_section_size (value section) {
-  CAMLparam1 (section);
-  GElf_Shdr shdr;
-  if ( gelf_getshdr (Elf_Scn_val (section), &shdr) != &shdr)
-    elf_error ("gelf_getshdr");
-  CAMLreturn (Val_int (shdr.sh_size));
-}
 
 CAMLprim value caml_elf_section_data_fill (value section, value bigarray) {
   CAMLparam2 (section, bigarray);
