@@ -149,6 +149,8 @@ ml_fun3 (int, elf32_fsize, Int, Int32, Int);
 ml_fun2 (int, elf_update, Elf, Int);
 ml_fun1 (Elf_Scn_option, elf_newscn, Elf)
 ml_fun2 (Elf_Scn_option, elf_nextscn, Elf, Elf_Scn_option)
+ml_fun2 (unit2, elfx_update_shstrndx, Elf, Int)
+
 #undef Val_copy_string
 
 //ml_fun1 (alloc_Elf32_Shdr, gelf_getshdr, Elf_Scn_val);
@@ -705,11 +707,4 @@ CAMLprim value caml_elf_data_get (value elf_data)
   WRITE_FIELD_IM (elf_data, ID);
   END_CAML_BLOCK ();
   CAMLreturn (elf_header);
-}
-
-CAMLprim value caml_elf_set_str_section_index  (value e, value index) {
-  CAMLparam2 (e, index);
-  Elf* elf = Elf_val (e);
-  elfx_update_shstrndx (elf, Int_val (index));
-  CAMLreturn (Val_unit);
 }

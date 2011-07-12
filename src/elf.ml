@@ -350,8 +350,8 @@ let int_of_flag = function
   | F_LAYOUT -> 0x4
   | F_LAYOUT_OVERLAP -> 0x10000000
 
-external elf_version : int -> int = "caml_elf_version"
-let version v = elf_version (int_of_ev v) |> ev_of_int
+external version : int -> int = "caml_elf_version"
+let version v = version (int_of_ev v) |> ev_of_int
 external begins : Unix.file_descr -> elf_cmd -> elf option -> elf option = "caml_elf_begin"
 external ends : elf -> unit = "caml_elf_end"
 external errmsg : int -> string = "caml_elf_errmsg"
@@ -366,11 +366,11 @@ external elf32_header : elf -> elf32_ehdr = "caml_elf_elf32_header"
 external program_header : elf -> elf32_phdr = "caml_elf_ph"
 external newscn : elf -> section option = "caml_elf_newscn"
 external create_data : section -> elf32_data = "caml_elf_newdata"
-external set_str_section_index : elf -> int -> unit = "caml_elf_set_str_section_index"
 external update : elf -> elf_cmd -> int = "caml_elf_update"
 external fsize : dtype -> int32 -> version -> int = "caml_elf32_fsize"
 external flagphdr_internal : elf -> elf_cmd -> int -> unit = "caml_elf_flagphdr"
 external nextscn : elf -> section option -> section option = "caml_elf_nextscn"
+external update_shstrndx : elf -> int -> unit = "caml_elfx_update_shstrndx"
 
 let flagphdr elf cmd flag = flagphdr_internal elf cmd (int_of_flag flag)
 
