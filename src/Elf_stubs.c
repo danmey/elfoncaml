@@ -28,7 +28,8 @@ static struct custom_operations elf_ops = {
   static inline value alloc_##name(name* s) { \
     value v = alloc_custom(&elf_ops, sizeof(name *), 0, 1); \
     (*((name**) Data_custom_val(v))) = s; \
-    return v; }
+    return v; } \
+  static inline value Val_##name(name* s) { return alloc_##name(s); }
 
 Struct(Elf)
 Struct(Elf_Scn)
@@ -150,6 +151,7 @@ ml_fun2 (int, elf_update, Elf, Int);
 ml_fun1 (Elf_Scn_option, elf_newscn, Elf)
 ml_fun2 (Elf_Scn_option, elf_nextscn, Elf, Elf_Scn_option)
 ml_fun2 (unit2, elfx_update_shstrndx, Elf, Int)
+ml_fun2 (Elf32_Phdr, elf32_newphdr, Elf, Int)
 
 #undef Val_copy_string
 
@@ -570,13 +572,6 @@ value int_to_mlflags (unsigned long flags)
   CAMLreturn (result);
 }
 
-CAMLprim value caml_elf_ph (value elf)
-{
-  CAMLparam1 (elf);
-  Elf32_Phdr* v = elf32_newphdr (Elf_val (elf), 1);
-  if (!v) elf_error ("elf32_newphdr");
-  CAMLreturn (alloc_Elf32_Phdr (v));
-}
 
 CAMLprim value caml_elf_ph_put (value elf_header, value phdr)
 {
