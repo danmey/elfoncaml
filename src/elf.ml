@@ -373,7 +373,16 @@ external flagphdr_internal : elf -> elf_cmd -> int -> unit = "caml_elf_flagphdr"
 external nextscn : elf -> elf_scn option -> elf_scn option = "caml_elf_nextscn"
 external update_shstrndx : elf -> int -> unit = "caml_elfx_update_shstrndx"
 external strptr : elf -> int -> int -> string option = "caml_elf_strptr"
-external getshdr : elf_scn -> gelf_shdr option = "caml_gelf_getshdr"
+external getehdr : elf -> elf32_ehdr option = "caml_elf32_getehdr"
+external getshdr : elf_scn -> elf32_shdr option = "caml_elf32_getshdr"
+external getclass : elf -> elf_class = "caml_gelf_getclass"
+external getident : elf -> string option = "caml_elf_getident"
+external getshdrnum : elf -> int = "caml_elf_getshdrnum"
+external getphdrnum : elf -> int = "caml_elf_getphdrnum"
+external vis : char -> int -> string = "caml_vis"
+external val_EI_ABIVERSION : unit -> int = "caml_val_EI_ABIVERSION"
+
+let ei_abiversion = val_EI_ABIVERSION ()
 
 let flagphdr elf cmd flag = flagphdr_internal elf cmd (int_of_flag flag)
 

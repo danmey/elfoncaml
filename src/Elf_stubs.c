@@ -12,6 +12,7 @@
 #include <gelf.h>
 #include <string.h>
 #include <stdio.h>
+#include <vis.h>
 
 static struct custom_operations elf_ops = {
   "org.danmey",
@@ -85,6 +86,8 @@ static void elf_error (char *cmdname) {
 Decl_Val_option (Elf)
 Decl_Val_option (Elf_Scn)
 Decl_Val_option (GElf_Shdr)
+Decl_Val_option (Elf32_Shdr)
+Decl_Val_option (Elf32_Ehdr)
 Decl_option_val (Elf)
 Decl_option_val (Elf_Scn)
 Decl_option_val (GElf_Shdr)
@@ -92,6 +95,11 @@ Decl_option_val (GElf_Shdr)
 #define string char
 Decl_Val_named_option (string, copy_string)
 #undef string
+
+#define ml_val(name)                                        \
+  CAMLprim value caml_val_##name () {                       \
+    CAMLparam0 ();                                          \
+    CAMLreturn (Val_int (name)); }
 
 #define ml_fun0(ret, name)                                  \
   CAMLprim value caml_##name () {                           \
@@ -118,6 +126,11 @@ Decl_Val_named_option (string, copy_string)
     CAMLparam1 (_a1);                                               \
     CAMLreturn (Val_ ## ret (caml_##name##_internal (arg1##_val (_a1)))); }
 
+#define ml_internal_fun2(ret, name, arg1, arg2)                     \
+  CAMLprim value caml_##name (value _a1, value _a2) {               \
+    CAMLparam2 (_a1, _a2);                                                  \
+    CAMLreturn (Val_ ## ret (caml_##name##_internal (arg1##_val (_a1), arg2##_val (_a2)))); }
+
 #define ml_internal_fun3(ret, name, arg1, arg2, arg3)                   \
   CAMLprim value caml_##name (value _a1, value _a2, value _a3) {        \
     CAMLparam3 (_a1, _a2, _a3);                                         \
@@ -140,40 +153,75 @@ CAMLprim GElf_Shdr* caml_gelf_getshdr_internal (Elf_Scn* elf_scn) {
   return shdr;
 }
 
+CAMLprim char* caml_elf_getident_internal (Elf* elf) {
+  return elf_getident (elf, NULL);
+}
+
+/* TODO: Should be factored in macro */
+CAMLprim int caml_elf_getshdrnum_internal (Elf* elf) {
+  size_t num;
+  if (elf_getshdrnum (elf, &num) == 0)
+    return -1;
+  return num;
+}
+
+CAMLprim int caml_elf_getphdrnum_internal (Elf* elf) {
+  size_t num;
+  if (elf_getphdrnum (elf, &num) == 0)
+    return -1;
+  return num;
+}
+
+/* TODO: This should be removed along with vis.h header! */
+CAMLprim char* caml_vis_internal (int a, int b) {
+  char* str = malloc (256);
+  vis (str, a, VIS_WHITE, b);
+  return str;
+}
+
 
 #define Val_copy_string copy_string
 #define Val_unit2(_a) Val_unit
-ml_fun3 (Elf_option, elf_begin, Int, Int, Elf_option);
-ml_fun2 (unit2, elf_cntl, Int, Elf_option);
-ml_fun1 (unit2, elf_end, Elf);
-ml_fun1 (copy_string, elf_errmsg, Int);
-ml_fun0 (int, elf_errno);
-ml_fun1 (int, elf_kind, Elf);
-ml_fun2 (Elf_Scn_option, elf_getscn, Elf, Int);
-ml_fun1 (int, elf_ndxscn, Elf_Scn);
-ml_fun1 (int, elf_version, Int);
-ml_fun3 (int, elf_flagdata, Elf_Data, Int, Int);
-ml_fun3 (int, elf_flagehdr, Elf, Int, Int);
-ml_fun3 (int, elf_flagelf,  Elf, Int, Int);
-ml_fun3 (int, elf_flagphdr, Elf, Int, Int);
-ml_fun3 (int, elf_flagscn , Elf_Scn, Int, Int);
-ml_fun3 (int, elf_flagshdr, Elf_Scn, Int, Int);
-ml_fun3 (int, elf32_fsize, Int, Int32, Int);
-ml_fun2 (int, elf_update, Elf, Int);
+
+ml_fun3 (Elf_option, elf_begin, Int, Int, Elf_option)
+ml_fun2 (unit2, elf_cntl, Int, Elf_option)
+ml_fun1 (unit2, elf_end, Elf)
+ml_fun1 (copy_string, elf_errmsg, Int)
+ml_fun0 (int, elf_errno)
+ml_fun1 (int, elf_kind, Elf)
+ml_fun2 (Elf_Scn_option, elf_getscn, Elf, Int)
+ml_fun1 (int, elf_ndxscn, Elf_Scn)
+ml_fun1 (int, elf_version, Int)
+ml_fun3 (int, elf_flagdata, Elf_Data, Int, Int)
+ml_fun3 (int, elf_flagehdr, Elf, Int, Int)
+ml_fun3 (int, elf_flagelf,  Elf, Int, Int)
+ml_fun3 (int, elf_flagphdr, Elf, Int, Int)
+ml_fun3 (int, elf_flagscn , Elf_Scn, Int, Int)
+ml_fun3 (int, elf_flagshdr, Elf_Scn, Int, Int)
+ml_fun3 (int, elf32_fsize, Int, Int32, Int)
+ml_fun2 (int, elf_update, Elf, Int)
 ml_fun1 (Elf_Scn_option, elf_newscn, Elf)
 ml_fun2 (Elf_Scn_option, elf_nextscn, Elf, Elf_Scn_option)
 ml_fun2 (unit2, elfx_update_shstrndx, Elf, Int)
 ml_fun2 (Elf32_Phdr, elf32_newphdr, Elf, Int)
-ml_fun1 (Elf32_Ehdr, elf32_newehdr, Elf);
+ml_fun1 (Elf32_Ehdr, elf32_newehdr, Elf)
+ml_fun1 (Elf32_Ehdr_option, elf32_getehdr, Elf)
+ml_fun1 (Elf32_Shdr_option, elf32_getshdr, Elf_Scn)
 ml_fun3 (string_option, elf_strptr, Elf, Int, Int)
-
-ml_internal_fun1 (GElf_Shdr_option, gelf_getshdr, Elf_Scn);
-ml_internal_fun1 (int, elf_getshdrstrndx, Elf);
+ml_fun1 (int, gelf_getclass, Elf)
+ml_internal_fun1 (string_option, elf_getident, Elf)
+ml_internal_fun1 (int, elf_getshdrstrndx, Elf)
+ml_internal_fun1 (int, elf_getshdrnum, Elf)
+ml_internal_fun1 (int, elf_getphdrnum, Elf)
+/* TODO: This should be removed along with vis.h header! */
+ml_internal_fun2 (copy_string, vis, Int, Int)
+ml_val (EI_ABIVERSION)
+/* Shall we support Gelf, the only advantage I see here to handle
+   uniformly architecture dependent bits */
+/* ml_internal_fun1 (GElf_Shdr_option, gelf_getshdr, Elf_Scn); */
+/* ml_internal_fun1 (GElf_Shdr_option, gelf_getehdr, Elf_Scn); */
 
 #undef Val_copy_string
-
-//ml_fun1 (alloc_Elf32_Shdr, gelf_getshdr, Elf_Scn_val);
-//ml_fun3 (alloc_string, elf_strptr, Elf_val, Int_val, String_val);
 
 CAMLprim value caml_elf_section_data_fill (value section, value bigarray) {
   CAMLparam2 (section, bigarray);

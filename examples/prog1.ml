@@ -1,7 +1,7 @@
 open Elf
 
-let err = Printf.fprintf stderr
-let errx fmt_hdr fmt_rst  = Printf.fprintf stderr (fmt_hdr ^^ fmt_rst)
+let err f x = failwith (Printf.sprintf f x)
+let errx fmt_hdr fmt_rst a  = failwith (Printf.sprintf (fmt_hdr ^^ fmt_rst) a)
 
 let _ =
   if Array.length Sys.argv != 2 then
