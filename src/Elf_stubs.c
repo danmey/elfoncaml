@@ -657,6 +657,43 @@ CAMLprim value caml_Elf32_Phdr_create (value elf32_phdr)
   CAMLreturn (phdr);
 }
 
+CAMLprim value caml_Elf32_Shdr_update (value shdr)
+{
+  CAMLparam1 (shdr);
+  Elf32_Shdr* hdr = Elf32_Shdr_val(Field(shdr, 10));
+  hdr->sh_name      = Int32_val (Field (shdr, 0));
+  hdr->sh_type      = sht_tab [Int_val (Field (shdr, 1))];
+  hdr->sh_flags     = mlflags_to_int (Field (shdr, 2));
+  hdr->sh_addr      = Int64_val (Field (shdr, 3));
+  hdr->sh_offset    = Int64_val (Field (shdr, 4));
+  hdr->sh_size      = Int32_val (Field (shdr, 5));
+  hdr->sh_link      = Int32_val (Field (shdr, 6));
+  hdr->sh_info      = Int32_val (Field (shdr, 7));
+  hdr->sh_addralign = Int32_val (Field (shdr, 8));
+  hdr->sh_entsize   = Int32_val (Field (shdr, 9));
+  CAMLreturn (Val_unit);
+}
+
+CAMLprim value caml_Elf32_Shdr_create (value elf32_shdr)
+{
+  CAMLparam1 (elf32_shdr);
+  CAMLlocal1 (shdr);
+  shdr = caml_alloc(11, 0);
+  Elf32_Shdr* hdr = Elf32_Shdr_val (elf32_shdr);
+  Field (shdr, 0) = copy_int32 (hdr->sh_name);
+  Field (shdr, 1) = Val_int (sht_to_int (hdr->sh_type));
+  Field (shdr, 2) = int_to_mlflags (hdr->sh_flags);
+  Field (shdr, 3) = copy_int64 (hdr->sh_addr);
+  Field (shdr, 4) = copy_int64 (hdr->sh_offset);
+  Field (shdr, 5) = copy_int32 (hdr->sh_size);
+  Field (shdr, 6) = copy_int32 (hdr->sh_link);
+  Field (shdr, 7) = copy_int32 (hdr->sh_info);
+  Field (shdr, 8) = copy_int32 (hdr->sh_addralign);
+  Field (shdr, 9) = copy_int32 (hdr->sh_entsize);
+  Field (shdr, 10) = elf32_shdr;
+  CAMLreturn (shdr);
+}
+
 /* CAMLprim value caml_elf_elf32_getshdr (value section) */
 /* { */
 /*   CAMLparam1 (section); */
@@ -666,48 +703,12 @@ CAMLprim value caml_Elf32_Phdr_create (value elf32_phdr)
 /*   CAMLreturn (alloc_Elf32_Shdr (shdr)); */
 /* } */
 
-CAMLprim value caml_elf_sh_put (value shdr, value elf_shdr)
-{
-  CAMLparam2 (shdr, elf_shdr);
-  Elf32_Shdr* hdr = Elf32_Shdr_val (shdr);
-  hdr->sh_name      = Int32_val (Field (elf_shdr, 0));
-  hdr->sh_type      = sht_tab [Int_val (Field (elf_shdr, 1))];
-  hdr->sh_flags     = mlflags_to_int (Field (elf_shdr, 2));
-  hdr->sh_addr      = Int64_val (Field (elf_shdr, 3));
-  hdr->sh_offset    = Int64_val (Field (elf_shdr, 4));
-  hdr->sh_size      = Int32_val (Field (elf_shdr, 5));
-  hdr->sh_link      = Int32_val (Field (elf_shdr, 6));
-  hdr->sh_info      = Int32_val (Field (elf_shdr, 7));
-  hdr->sh_addralign = Int32_val (Field (elf_shdr, 8));
-  hdr->sh_entsize   = Int32_val (Field (elf_shdr, 9));
-  CAMLreturn (Val_unit);
-}
 
-CAMLprim value caml_elf_sh_get (value shdr)
+CAMLprim value caml_Elf_Data_update (value data)
 {
-  CAMLparam1 (shdr);
-  CAMLlocal1 (elf_shdr);
-  Elf32_Shdr* hdr = Elf32_Shdr_val (shdr);
-  elf_shdr  = caml_alloc_small(11, 0);
-  Field (elf_shdr, 0) = copy_int32 (hdr->sh_name);
-  Field (elf_shdr, 1) = Val_int (sht_to_int (hdr->sh_type));
-  Field (elf_shdr, 2) = int_to_mlflags (hdr->sh_flags);
-  Field (elf_shdr, 3) = copy_int64 (hdr->sh_addr);
-  Field (elf_shdr, 4) = copy_int64 (hdr->sh_offset);
-  Field (elf_shdr, 5) = copy_int32 (hdr->sh_size);
-  Field (elf_shdr, 6) = copy_int32 (hdr->sh_link);
-  Field (elf_shdr, 7) = copy_int32 (hdr->sh_info);
-  Field (elf_shdr, 8) = copy_int32 (hdr->sh_addralign);
-  Field (elf_shdr, 9) = copy_int32 (hdr->sh_entsize);
-  Field (elf_shdr, 10) = shdr;
-  CAMLreturn (elf_shdr);
-}
+  CAMLparam1 (data);
+  Elf_Data* hdr = Elf_Data_val(Field(data, 6));
 
-
-CAMLprim value caml_elf_data_put (value elf_data, value data)
-{
-  CAMLparam2 (elf_data, data);
-  Elf_Data* hdr = Elf_Data_val (elf_data);
   BEGIN_CAML_BLOCK (0, data);
 #define BA(x) (Is_block(x) ? Data_bigarray_val (Field(x,0)) : 0)
   READ_FIELD (d_buf, BA);
@@ -730,13 +731,13 @@ value build_ba (void *x)
   CAMLreturn (option);
 }
 
-CAMLprim value caml_elf_data_get (value elf_data)
+CAMLprim value caml_Elf_Data_create (value elf_data)
 {
   CAMLparam1 (elf_data);
-  CAMLlocal1 (elf_header);
+  CAMLlocal1 (data);
   Elf_Data* hdr = Elf_Data_val (elf_data);
-  elf_header = caml_alloc_small(7, 0);
-  BEGIN_CAML_BLOCK (0, elf_header);
+  data = caml_alloc_small(7, 0);
+  BEGIN_CAML_BLOCK (0, data);
 #define BA(x) ((x) != 0 ? build_ba (x) : Val_int (0))
   WRITE_FIELD (d_buf, BA);
   WRITE_FIELD (d_type, Val_int);
@@ -746,5 +747,7 @@ CAMLprim value caml_elf_data_get (value elf_data)
   WRITE_FIELD (d_version, Val_int);
   WRITE_FIELD_IM (elf_data, ID);
   END_CAML_BLOCK ();
-  CAMLreturn (elf_header);
+  CAMLreturn (data);
 }
+
+

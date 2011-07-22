@@ -22,25 +22,26 @@ let _ =
                   let phdr = newphdr elf 1 in
                   let phdr = Elf32_Phdr.create phdr in
                   Elf32_Phdr.update phdr;
-                  (* match newscn elf with *)
-                  (*   | None -> failwith "newscn" *)
-                  (*   | Some scn -> *)
-                  (*     let data = SectionData.create scn in *)
-                  (*     SectionData.update { data with *)
-                  (*       d_align = 4L; *)
-                  (*       d_off = 0L; *)
-                  (*   (\* d_buf = Some (Bigarray.Array1.of_array Bigarray.int32 Bigarray.c_layout [|0x01234567l;0x89abcdefl;0xdeadc0del|]); *\) *)
-                  (*       d_type = T_WORD; *)
-                  (*       d_size = 12L; *)
-                  (*       d_version = EV_CURRENT; *)
-                  (*     }; *)
-                  (*     let shdr = SectionHeader.from_section scn in *)
-                  (*     SectionHeader.update { shdr with *)
-                  (*       sh_name = 1l; *)
-                  (*       sh_type = SHT_HASH; *)
-                  (*       sh_flags = [SHF_ALLOC]; *)
-                  (*       sh_entsize = 0l; *)
-                  (*     }; *)
+                  match newscn elf with
+                    | None -> failwith "newscn"
+                    | Some scn ->
+                      let data = Elf_Data.create (newdata scn) in
+                      Elf_Data.update { data with
+                        d_align = 4L;
+                        d_off = 0L;
+                    (* d_buf = Some (Bigarray.Array1.of_array Bigarray.int32 Bigarray.c_layout [|0x01234567l;0x89abcdefl;0xdeadc0del|]); *)
+                        d_type = T_WORD;
+                        d_size = 12L;
+                        d_version = EV_CURRENT;
+                      };
+                      let Some shdr = getshdr scn in
+                      let shdr = Elf32_Shdr.create shdr in
+                      Elf32_Shdr.update { shdr with
+                        sh_name = 1l;
+                        sh_type = SHT_HASH;
+                        sh_flags = [SHF_ALLOC];
+                        sh_entsize = 0l;
+                      };
                       
                   (*     let Some scn = newscn elf in *)
                   (*     let data = SectionData.create scn in *)
