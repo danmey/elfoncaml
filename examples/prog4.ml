@@ -14,8 +14,8 @@ let _ =
               let kind = Elf.kind elf in
               match kind with
                 | Elf.K_ELF -> begin
-                  let ehdr = Elf.Elf32Header.get (Elf.newehdr elf) in
-                  print_endline (Elf.Elf32Header.to_string ehdr);
+                  let ehdr = Elf.Elf32_Ehdr.create (Elf.newehdr elf) in
+                  print_endline (Elf.Elf32_Ehdr.to_string ehdr);
                   let idx = Elf.getshdrstrndx elf in
                   match Elf.getscn elf idx with
                     | None -> err "elf_getscn() failed: %s."

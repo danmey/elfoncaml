@@ -213,6 +213,7 @@ ml_internal_fun1 (string_option, elf_getident, Elf)
 ml_internal_fun1 (int, elf_getshdrstrndx, Elf)
 ml_internal_fun1 (int, elf_getshdrnum, Elf)
 ml_internal_fun1 (int, elf_getphdrnum, Elf)
+
 /* TODO: This should be removed along with vis.h header! */
 ml_internal_fun2 (copy_string, vis, Int, Int)
 ml_val (EI_ABIVERSION)
@@ -418,18 +419,19 @@ int et_to_int(int v)
   return 0;
 }
 
+/* TODO: This mess needs to be refactored */
 #define BEGIN_CAML_BLOCK(f,x) do { int _field = f; value _hdr = x;
 #define END_CAML_BLOCK()  } while (0)
 #define READ_FIELD(name, convert) hdr->name = convert (Field (_hdr, _field)); _field++;
-#define WRITE_FIELD(name, convert) Field (_hdr, _field) = convert (hdr->name); _field++;
-#define WRITE_FIELD_IM(name, convert) Field (_hdr, _field) = convert (name); _field++;
+#define WRITE_FIELD(name, convert) Store_field (_hdr, _field, convert (hdr->name)); _field++
+#define WRITE_FIELD_IM(name, convert) Store_field (_hdr, _field, convert (name)); _field++;
 
-CAMLprim value caml_elf_elf32_put (value efhdr, value elf_header)
+CAMLprim value caml_Elf32_Ehdr_update (value ehdr)
 {
-  CAMLparam2 (efhdr, elf_header);
+  CAMLparam1 (ehdr);
   CAMLlocal1 (e_ident);
-  Elf32_Ehdr* hdr = Elf32_Ehdr_val (efhdr);
-  e_ident = Field (elf_header, 0);
+  Elf32_Ehdr* hdr = Elf32_Ehdr_val(Field(ehdr, 14));
+  e_ident = Field (ehdr, 0);
   BEGIN_CAML_BLOCK (0, e_ident);
   READ_FIELD (e_ident[_field], Int_val);
   READ_FIELD (e_ident[_field], Int_val);
@@ -441,14 +443,14 @@ CAMLprim value caml_elf_elf32_put (value efhdr, value elf_header)
   READ_FIELD (e_ident[_field], Int_val);
   END_CAML_BLOCK ();
 #define ET_TAB(what) et_tab[Int_val (what)]
-  BEGIN_CAML_BLOCK (1, elf_header);
+  BEGIN_CAML_BLOCK (1, ehdr);
   READ_FIELD(e_type, ET_TAB);
   READ_FIELD(e_machine, variant_to_enum);
   READ_FIELD(e_version   , Int_val);
   READ_FIELD(e_entry     , Int64_val);
   READ_FIELD(e_phoff     , Int64_val);
   READ_FIELD(e_shoff     , Int64_val);
-  READ_FIELD(e_flags     , Int64_val);
+  READ_FIELD(e_flags     , Int32_val);
   READ_FIELD(e_ehsize    , Int_val);
   READ_FIELD(e_phentsize , Int_val);
   READ_FIELD(e_phnum     , Int_val);
@@ -459,12 +461,14 @@ CAMLprim value caml_elf_elf32_put (value efhdr, value elf_header)
   CAMLreturn (Val_unit);
 }
 
-CAMLprim value caml_elf_elf32_get (value efhdr)
+CAMLprim value caml_Elf32_Ehdr_create (value elf32_ehdr)
 {
-  CAMLparam1 (efhdr);
-  CAMLlocal2 (e_ident, elf_header);
-  Elf32_Ehdr* hdr = Elf32_Ehdr_val (efhdr);
-  e_ident = caml_alloc_small(8, 0);
+  CAMLparam1 (elf32_ehdr);
+  CAMLlocal2 (e_ident, ehdr);
+  Elf32_Ehdr* hdr = Elf32_Ehdr_val (elf32_ehdr);
+
+  e_ident = caml_alloc(8, 0);
+
   BEGIN_CAML_BLOCK (0, e_ident);
   WRITE_FIELD (e_ident[_field], Val_int);
   WRITE_FIELD (e_ident[_field], Val_int);
@@ -475,10 +479,10 @@ CAMLprim value caml_elf_elf32_get (value efhdr)
   WRITE_FIELD (e_ident[_field], Val_int);
   WRITE_FIELD (e_ident[_field], Val_int);
   END_CAML_BLOCK ();
-  elf_header = caml_alloc_small(15, 0);
-#define ET_TO_INT(x) Val_int (et_to_int (x));
+  ehdr = caml_alloc(15, 0);
+#define ET_TO_INT(x) Val_int (et_to_int (x))
 #define ID(x) x
-  BEGIN_CAML_BLOCK (0, elf_header);
+  BEGIN_CAML_BLOCK (0, ehdr);
   WRITE_FIELD_IM (e_ident, ID);
   WRITE_FIELD (e_type, ET_TO_INT);
   WRITE_FIELD (e_machine, enum_to_variant);
@@ -486,16 +490,16 @@ CAMLprim value caml_elf_elf32_get (value efhdr)
   WRITE_FIELD (e_entry, copy_int64);
   WRITE_FIELD (e_phoff, copy_int64);
   WRITE_FIELD (e_shoff, copy_int64);
-  WRITE_FIELD (e_flags, copy_int64);
+  WRITE_FIELD (e_flags, copy_int32);
   WRITE_FIELD (e_ehsize, Val_int);
   WRITE_FIELD (e_phentsize, Val_int);
   WRITE_FIELD (e_phnum, Val_int);
   WRITE_FIELD (e_shentsize, Val_int);
   WRITE_FIELD (e_shnum, Val_int);
   WRITE_FIELD (e_shstrndx, Val_int);
-  WRITE_FIELD_IM (efhdr, ID);
+  WRITE_FIELD_IM (elf32_ehdr, ID);
   END_CAML_BLOCK ();
-  CAMLreturn (elf_header);
+  CAMLreturn (ehdr);
 }
 
 static unsigned long pt_tab[] =
@@ -649,14 +653,14 @@ CAMLprim value caml_elf_ph_get_internal (value phdr, value elf_phdr)
   CAMLreturn (Val_unit);
 }
 
-CAMLprim value caml_elf_elf32_getshdr (value section)
-{
-  CAMLparam1 (section);
-  Elf32_Shdr* shdr = 0;
-  if ( (shdr = elf32_getshdr (Elf_Scn_val (section))) == 0)
-    elf_error ("elf_getshdr");
-  CAMLreturn (alloc_Elf32_Shdr (shdr));
-}
+/* CAMLprim value caml_elf_elf32_getshdr (value section) */
+/* { */
+/*   CAMLparam1 (section); */
+/*   Elf32_Shdr* shdr = 0; */
+/*   if ( (shdr = elf32_getshdr (Elf_Scn_val (section))) == 0) */
+/*     elf_error ("elf_getshdr"); */
+/*   CAMLreturn (alloc_Elf32_Shdr (shdr)); */
+/* } */
 
 CAMLprim value caml_elf_sh_put (value shdr, value elf_shdr)
 {

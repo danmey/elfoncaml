@@ -35,7 +35,7 @@ let _ =
                 Printf.printf " ['%s' %X]" bytes (int_of_char id.[i])
               done;
               print_endline "";
-              let ehdr = Elf32Header.get ehdr in
+              let ehdr = Elf32_Ehdr.create ehdr in
               let pf v = Printf.printf "    %-20s 0x%x\n" v in
               let pfL v = Printf.printf "    %-20s 0x%Lx\n" v in
               let pfl v = Printf.printf "    %-20s 0x%lx\n" v in

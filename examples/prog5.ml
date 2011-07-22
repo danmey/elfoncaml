@@ -12,66 +12,67 @@ let _ =
               match begins fd C_WRITE None with
                 | None -> failwith "begins"
                 | Some elf ->
-                  let ehdr = Elf32Header.create elf in
-                  Elf32Header.update { ehdr with
+                  let ehdr = newehdr elf in
+                  let ehdr = Elf32_Ehdr.create ehdr in
+                  Elf32_Ehdr.update { ehdr with
                     e_ident =
                       { ehdr.e_ident with adata = Elf.ELFDATA2MSB };
                     e_machine = `PPC;
                     e_type = ET_EXEC; };
-                  let phdr = ProgramHeader.create elf in
-                  match newscn elf with
-                    | None -> failwith "newscn"
-                    | Some scn ->
-                      let data = SectionData.create scn in
-                      SectionData.update { data with
-                        d_align = 4L;
-                        d_off = 0L;
-                    (* d_buf = Some (Bigarray.Array1.of_array Bigarray.int32 Bigarray.c_layout [|0x01234567l;0x89abcdefl;0xdeadc0del|]); *)
-                        d_type = T_WORD;
-                        d_size = 12L;
-                        d_version = EV_CURRENT;
-                      };
-                      let shdr = SectionHeader.from_section scn in
-                      SectionHeader.update { shdr with
-                        sh_name = 1l;
-                        sh_type = SHT_HASH;
-                        sh_flags = [SHF_ALLOC];
-                        sh_entsize = 0l;
-                      };
+                  (* let phdr = ProgramHeader.create elf in *)
+                  (* match newscn elf with *)
+                  (*   | None -> failwith "newscn" *)
+                  (*   | Some scn -> *)
+                  (*     let data = SectionData.create scn in *)
+                  (*     SectionData.update { data with *)
+                  (*       d_align = 4L; *)
+                  (*       d_off = 0L; *)
+                  (*   (\* d_buf = Some (Bigarray.Array1.of_array Bigarray.int32 Bigarray.c_layout [|0x01234567l;0x89abcdefl;0xdeadc0del|]); *\) *)
+                  (*       d_type = T_WORD; *)
+                  (*       d_size = 12L; *)
+                  (*       d_version = EV_CURRENT; *)
+                  (*     }; *)
+                  (*     let shdr = SectionHeader.from_section scn in *)
+                  (*     SectionHeader.update { shdr with *)
+                  (*       sh_name = 1l; *)
+                  (*       sh_type = SHT_HASH; *)
+                  (*       sh_flags = [SHF_ALLOC]; *)
+                  (*       sh_entsize = 0l; *)
+                  (*     }; *)
                       
-                      let Some scn = newscn elf in
-                      let data = SectionData.create scn in
-                  (* let c = int_of_char in *)
-                      SectionData.update { data with
-                        d_align = 1L;
-                    (* d_buf = Some (Bigarray.Array1.of_array Bigarray.int8_unsigned Bigarray.c_layout *)
-                    (*                 (Array.map c [| *)
-                    (*                   char_of_int 0; *)
-                    (*                   '.'; 'f'; 'o'; 'o'; char_of_int 0; *)
-                    (*                   '.'; 's'; 'h'; 's';'t'; char_of_int 0; *)
-                    (*                   'r'; 't'; 'a'; 'b'; char_of_int 0; *)
-                    (*                 |])); *)
-                        d_off = 0L;
-                        d_size = 17L;
-                        d_type = T_BYTE;
-                        d_version = EV_CURRENT;
-                      };
-                      SectionHeader.update { (SectionHeader.from_section scn) with
-                        sh_name = 6l;
-                        sh_type = SHT_STRTAB;
-                    (* sh_flags = [SHF_STRINGS;SHF_ALLOC]; *)
-                        sh_entsize = 0l;
-                      };
-                      (* update_shstrndx elf (ndxscn scn); *)
-                      ignore (update elf C_NULL);
-                      let ehdr = Elf32Header.get ehdr.ehdr in
-                      ProgramHeader.update { phdr with
-                        p_type = PT_PHDR;
-                        p_offset = ehdr.e_phoff;
-                        p_filesz = fsize T_PHDR 1l EV_CURRENT;
-                      };
-                      flagphdr elf C_SET F_DIRTY;
-                      ignore (update elf C_WRITE);
+                  (*     let Some scn = newscn elf in *)
+                  (*     let data = SectionData.create scn in *)
+                  (* (\* let c = int_of_char in *\) *)
+                  (*     SectionData.update { data with *)
+                  (*       d_align = 1L; *)
+                  (*   (\* d_buf = Some (Bigarray.Array1.of_array Bigarray.int8_unsigned Bigarray.c_layout *\) *)
+                  (*   (\*                 (Array.map c [| *\) *)
+                  (*   (\*                   char_of_int 0; *\) *)
+                  (*   (\*                   '.'; 'f'; 'o'; 'o'; char_of_int 0; *\) *)
+                  (*   (\*                   '.'; 's'; 'h'; 's';'t'; char_of_int 0; *\) *)
+                  (*   (\*                   'r'; 't'; 'a'; 'b'; char_of_int 0; *\) *)
+                  (*   (\*                 |])); *\) *)
+                  (*       d_off = 0L; *)
+                  (*       d_size = 17L; *)
+                  (*       d_type = T_BYTE; *)
+                  (*       d_version = EV_CURRENT; *)
+                  (*     }; *)
+                  (*     SectionHeader.update { (SectionHeader.from_section scn) with *)
+                  (*       sh_name = 6l; *)
+                  (*       sh_type = SHT_STRTAB; *)
+                  (*   (\* sh_flags = [SHF_STRINGS;SHF_ALLOC]; *\) *)
+                  (*       sh_entsize = 0l; *)
+                  (*     }; *)
+                  (*     (\* update_shstrndx elf (ndxscn scn); *\) *)
+                  (*     ignore (update elf C_NULL); *)
+                  (*     let ehdr = Elf32Header.get ehdr.ehdr in *)
+                  (*     ProgramHeader.update { phdr with *)
+                  (*       p_type = PT_PHDR; *)
+                  (*       p_offset = ehdr.e_phoff; *)
+                  (*       p_filesz = fsize T_PHDR 1l EV_CURRENT; *)
+                  (*     }; *)
+                  (*     flagphdr elf C_SET F_DIRTY; *)
+                  (*     ignore (update elf C_WRITE); *)
                       ends elf;
                       Unix.close fd;
                       exit 0
