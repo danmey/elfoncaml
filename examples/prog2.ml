@@ -29,8 +29,8 @@ let _ =
           match getident e with
             | None -> err "getident() failed: %s." (errmsg (-1))
             | Some id -> begin
-              Printf.printf "%3s e_ident[0..%1d] %7s" " " ei_abiversion " ";
-              for i = 0 to ei_abiversion - 2  do
+              Printf.printf "%3s e_ident[0..%1d] %7s" " " (int_of_ei EI_ABIVERSION) " ";
+              for i = 0 to int_of_ei EI_ABIVERSION - 2  do
                 let bytes = vis id.[i] 0 in
                 Printf.printf " ['%s' %X]" bytes (int_of_char id.[i])
               done;

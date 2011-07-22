@@ -70,7 +70,7 @@ let _ =
                         (* sh_flags = [SHF_STRINGS;SHF_ALLOC]; *)
                         sh_entsize = 0l;
                       };
-                      (* update_shstrndx elf (ndxscn scn); *)
+                      update_shstrndx elf (ndxscn scn);
                       ignore (update elf C_NULL);
                       Elf32_Phdr.update { phdr with
                         p_type = PT_PHDR;

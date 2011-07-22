@@ -351,7 +351,6 @@ let int_of_flag = function
 
 
 external version : int -> int = "caml_elf_version"
-let version v = version (int_of_ev v) |> ev_of_int
 external begins : Unix.file_descr -> elf_cmd -> elf option -> elf option = "caml_elf_begin"
 external ends : elf -> unit = "caml_elf_end"
 external errmsg : int -> string = "caml_elf_errmsg"
@@ -364,7 +363,7 @@ external newphdr : elf -> int -> elf32_phdr = "caml_elf32_newphdr"
 external newscn : elf -> elf_scn option = "caml_elf_newscn"
 external update : elf -> elf_cmd -> int = "caml_elf_update"
 external fsize : dtype -> int32 -> version -> int = "caml_elf32_fsize"
-external flagphdr_internal : elf -> elf_cmd -> int -> unit = "caml_elf_flagphdr"
+external flagphdr : elf -> elf_cmd -> int -> unit = "caml_elf_flagphdr"
 external nextscn : elf -> elf_scn option -> elf_scn option = "caml_elf_nextscn"
 external update_shstrndx : elf -> int -> unit = "caml_elfx_update_shstrndx"
 external newdata  : elf_scn -> elf_data = "caml_elf_newdata"
@@ -375,12 +374,12 @@ external getclass : elf -> elf_class = "caml_gelf_getclass"
 external getident : elf -> string option = "caml_elf_getident"
 external getshdrnum : elf -> int = "caml_elf_getshdrnum"
 external getphdrnum : elf -> int = "caml_elf_getphdrnum"
+external update_shstrndx : elf -> int -> unit = "caml_elfx_update_shstrndx"
 external vis : char -> int -> string = "caml_vis"
-external val_EI_ABIVERSION : unit -> int = "caml_val_EI_ABIVERSION"
 
-let ei_abiversion = val_EI_ABIVERSION ()
-
-let flagphdr elf cmd flag = flagphdr_internal elf cmd (int_of_flag flag)
+let flagphdr elf cmd flag = flagphdr elf cmd (int_of_flag flag)
+let version v = version (int_of_ev v) |> ev_of_int
+let int_of_ei : elf_ei -> int = Obj.magic
 
 let rec sections elf =
   let rec loop = function
