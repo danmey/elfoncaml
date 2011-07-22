@@ -363,6 +363,7 @@ external getshdrstrndx : elf -> int = "caml_elf_getshdrstrndx"
 external getscn : elf -> int -> elf_scn option = "caml_elf_getscn"
 external ndxscn : elf_scn -> int = "caml_elf_ndxscn"
 external newehdr : elf -> elf32_ehdr = "caml_elf32_newehdr"
+external newphdr : elf -> int -> elf32_phdr = "caml_elf32_newphdr"
 external newscn : elf -> section option = "caml_elf_newscn"
 external create_data : section -> elf32_data = "caml_elf_newdata"
 external update : elf -> elf_cmd -> int = "caml_elf_update"
@@ -576,34 +577,12 @@ module Elf32_Ehdr = struct
     ^ "Section header string table index:\t" ^ string_of_int e_shstrndx ^ "\n"
 end
 
-(* module ProgramHeader = struct *)
-(*   type t = phdr *)
-(*   type native_t = elf32_phdr *)
-(*   external put : t -> native_t -> unit = "caml_elf_ph_put" *)
-(*   external get_internal : native_t -> t -> unit = "caml_elf_ph_get_internal" *)
-(*   let get phdr = *)
-(*     let hdr = { *)
-(*       p_type = PT_NULL; *)
-(*       p_offset = 0L; *)
-(*       p_vaddr = 0L; *)
-(*       p_paddr = 0L; *)
-(*       p_filesz = 0; *)
-(*       p_memsz = 0; *)
-(*       p_flags = 0; *)
-(*       p_align = 0; *)
-(*       phdr = phdr; *)
-(*     } in *)
-(*     get_internal phdr hdr; *)
-(*     hdr *)
-
-(*   let create elf = *)
-(*     let hdr = program_header elf in *)
-(*     get hdr *)
-
-(*   let update hdr = *)
-(*     put hdr hdr.phdr *)
-
-(* end *)
+module Elf32_Phdr = struct
+  type t = phdr
+  type native_t = elf32_phdr
+  external create : native_t -> t = "caml_Elf32_Phdr_create"
+  external update : t -> unit = "caml_Elf32_Phdr_update"
+end
 
 (* module SectionHeader = struct *)
 (*   type native_t = section *)

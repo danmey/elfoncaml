@@ -19,7 +19,9 @@ let _ =
                       { ehdr.e_ident with adata = Elf.ELFDATA2MSB };
                     e_machine = `PPC;
                     e_type = ET_EXEC; };
-                  (* let phdr = ProgramHeader.create elf in *)
+                  let phdr = newphdr elf 1 in
+                  let phdr = Elf32_Phdr.create phdr in
+                  Elf32_Phdr.update phdr;
                   (* match newscn elf with *)
                   (*   | None -> failwith "newscn" *)
                   (*   | Some scn -> *)
