@@ -1,10 +1,5 @@
 include Arch_type
 
-type addr = Int64.t
-type off = Int64.t
-type size = Int64.t
-type word = Int32.t
-type half = int
 type scn
 type t
 type version =
@@ -167,9 +162,9 @@ module Data = struct
   type ('a,'b) t = {
     d_buf     : ('a, 'b, Bigarray.c_layout) Bigarray.Array1.t option;
     d_type    : dtype;
-    d_size    : size;
-    d_off     : off;
-    d_align   : size;
+    d_size    : int32;
+    d_off     : int32;
+    d_align   : int32;
     d_version : version;
     data      : data_type;
   }

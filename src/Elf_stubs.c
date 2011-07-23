@@ -447,9 +447,9 @@ CAMLprim value caml_Elf32_Ehdr_update (value ehdr)
   READ_FIELD(e_type, ET_TAB);
   READ_FIELD(e_machine, variant_to_enum);
   READ_FIELD(e_version   , Int_val);
-  READ_FIELD(e_entry     , Int64_val);
-  READ_FIELD(e_phoff     , Int64_val);
-  READ_FIELD(e_shoff     , Int64_val);
+  READ_FIELD(e_entry     , Int32_val);
+  READ_FIELD(e_phoff     , Int32_val);
+  READ_FIELD(e_shoff     , Int32_val);
   READ_FIELD(e_flags     , Int32_val);
   READ_FIELD(e_ehsize    , Int_val);
   READ_FIELD(e_phentsize , Int_val);
@@ -487,9 +487,9 @@ CAMLprim value caml_Elf32_Ehdr_create (value elf32_ehdr)
   WRITE_FIELD (e_type, ET_TO_INT);
   WRITE_FIELD (e_machine, enum_to_variant);
   WRITE_FIELD (e_version, Val_int);
-  WRITE_FIELD (e_entry, copy_int64);
-  WRITE_FIELD (e_phoff, copy_int64);
-  WRITE_FIELD (e_shoff, copy_int64);
+  WRITE_FIELD (e_entry, copy_int32);
+  WRITE_FIELD (e_phoff, copy_int32);
+  WRITE_FIELD (e_shoff, copy_int32);
   WRITE_FIELD (e_flags, copy_int32);
   WRITE_FIELD (e_ehsize, Val_int);
   WRITE_FIELD (e_phentsize, Val_int);
@@ -628,9 +628,9 @@ CAMLprim value caml_Elf32_Phdr_update (value phdr)
   BEGIN_CAML_BLOCK (0, phdr);
 #define PT_TAB(x) pt_tab[Int_val (x)]
   READ_FIELD (p_type, PT_TAB);
-  READ_FIELD (p_offset, Int64_val);
-  READ_FIELD (p_vaddr , Int64_val);
-  READ_FIELD (p_paddr , Int64_val);
+  READ_FIELD (p_offset, Int32_val);
+  READ_FIELD (p_vaddr , Int32_val);
+  READ_FIELD (p_paddr , Int32_val);
   READ_FIELD (p_filesz, Int_val);
   READ_FIELD (p_memsz , Int_val);
   READ_FIELD (p_flags , Int_val);
@@ -646,9 +646,9 @@ CAMLprim value caml_Elf32_Phdr_create (value elf32_phdr)
   phdr = caml_alloc(9, 0);
   Elf32_Phdr* hdr = Elf32_Phdr_val (elf32_phdr);
   Field (phdr, 0) = Val_int (pt_to_int (hdr->p_type));
-  Field (phdr, 1) = copy_int64 (hdr->p_offset);
-  Field (phdr, 2) = copy_int64 (hdr->p_vaddr);
-  Field (phdr, 3) = copy_int64 (hdr->p_paddr);
+  Field (phdr, 1) = copy_int32 (hdr->p_offset);
+  Field (phdr, 2) = copy_int32 (hdr->p_vaddr);
+  Field (phdr, 3) = copy_int32 (hdr->p_paddr);
   Field (phdr, 4) = Val_int (hdr->p_filesz);
   Field (phdr, 5) = Val_int (hdr->p_memsz);
   Field (phdr, 6) = Val_int (hdr->p_flags);
@@ -664,8 +664,8 @@ CAMLprim value caml_Elf32_Shdr_update (value shdr)
   hdr->sh_name      = Int32_val (Field (shdr, 0));
   hdr->sh_type      = sht_tab [Int_val (Field (shdr, 1))];
   hdr->sh_flags     = mlflags_to_int (Field (shdr, 2));
-  hdr->sh_addr      = Int64_val (Field (shdr, 3));
-  hdr->sh_offset    = Int64_val (Field (shdr, 4));
+  hdr->sh_addr      = Int32_val (Field (shdr, 3));
+  hdr->sh_offset    = Int32_val (Field (shdr, 4));
   hdr->sh_size      = Int32_val (Field (shdr, 5));
   hdr->sh_link      = Int32_val (Field (shdr, 6));
   hdr->sh_info      = Int32_val (Field (shdr, 7));
@@ -683,8 +683,8 @@ CAMLprim value caml_Elf32_Shdr_create (value elf32_shdr)
   Field (shdr, 0) = copy_int32 (hdr->sh_name);
   Field (shdr, 1) = Val_int (sht_to_int (hdr->sh_type));
   Field (shdr, 2) = int_to_mlflags (hdr->sh_flags);
-  Field (shdr, 3) = copy_int64 (hdr->sh_addr);
-  Field (shdr, 4) = copy_int64 (hdr->sh_offset);
+  Field (shdr, 3) = copy_int32 (hdr->sh_addr);
+  Field (shdr, 4) = copy_int32 (hdr->sh_offset);
   Field (shdr, 5) = copy_int32 (hdr->sh_size);
   Field (shdr, 6) = copy_int32 (hdr->sh_link);
   Field (shdr, 7) = copy_int32 (hdr->sh_info);
@@ -714,9 +714,9 @@ CAMLprim value caml_Elf_Data_update (value data)
   READ_FIELD (d_buf, BA);
 #undef BA
   READ_FIELD (d_type, Int_val);
-  READ_FIELD (d_size, Int64_val);
-  READ_FIELD (d_off, Int64_val);
-  READ_FIELD (d_align, Int64_val);
+  READ_FIELD (d_size, Int32_val);
+  READ_FIELD (d_off, Int32_val);
+  READ_FIELD (d_align, Int32_val);
   READ_FIELD (d_version, Int_val);
   END_CAML_BLOCK ();
   CAMLreturn (Val_unit);
@@ -741,9 +741,9 @@ CAMLprim value caml_Elf_Data_create (value elf_data)
 #define BA(x) ((x) != 0 ? build_ba (x) : Val_int (0))
   WRITE_FIELD (d_buf, BA);
   WRITE_FIELD (d_type, Val_int);
-  WRITE_FIELD (d_size, copy_int64);
-  WRITE_FIELD (d_off, copy_int64);
-  WRITE_FIELD (d_align, copy_int64);
+  WRITE_FIELD (d_size, copy_int32);
+  WRITE_FIELD (d_off, copy_int32);
+  WRITE_FIELD (d_align, copy_int32);
   WRITE_FIELD (d_version, Val_int);
   WRITE_FIELD_IM (elf_data, ID);
   END_CAML_BLOCK ();

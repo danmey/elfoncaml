@@ -27,11 +27,11 @@ let _ =
                     | Some scn ->
                       let data = Data.create (newdata scn) in
                       Data.update { data with
-                        Data.d_align = 4L;
-                        Data.d_off = 0L;
+                        Data.d_align = 4l;
+                        Data.d_off = 0l;
                     (* d_buf = Some (Bigarray.Array1.of_array Bigarray.int32 Bigarray.c_layout [|0x01234567l;0x89abcdefl;0xdeadc0del|]); *)
                         Data.d_type = T_WORD;
-                        Data.d_size = 12L;
+                        Data.d_size = 12l;
                         Data.d_version = EV_CURRENT;
                       };
                       let Some shdr = getshdr scn in
@@ -49,7 +49,7 @@ let _ =
                       let data = Data.create (newdata scn) in
                       let c = int_of_char in
                       Data.update { data with
-                        Data.d_align = 1L;
+                        Data.d_align = 1l;
                     (* d_buf = Some (Bigarray.Array1.of_array Bigarray.int8_unsigned Bigarray.c_layout *)
                     (*                 (Array.map c [| *)
                     (*                   char_of_int 0; *)
@@ -57,8 +57,8 @@ let _ =
                     (*                   '.'; 's'; 'h'; 's';'t'; char_of_int 0; *)
                     (*                   'r'; 't'; 'a'; 'b'; char_of_int 0; *)
                     (*                 |])); *)
-                        Data.d_off = 0L;
-                        Data.d_size = 17L;
+                        Data.d_off = 0l;
+                        Data.d_size = 17l;
                         Data.d_type = T_BYTE;
                         Data.d_version = EV_CURRENT;
                       };

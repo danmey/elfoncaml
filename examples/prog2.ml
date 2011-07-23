@@ -38,14 +38,13 @@ let _ =
               print_endline "";
               let ehdr = Ehdr.create ehdr in
               let pf v = Printf.printf "    %-20s 0x%x\n" v in
-              let pfL v = Printf.printf "    %-20s 0x%Lx\n" v in
               let pfl v = Printf.printf "    %-20s 0x%lx\n" v in
               pf "e_type" (Obj.magic ehdr.Ehdr.e_type);
               pf "e_machine" (Obj.magic ehdr.Ehdr.e_machine);
               pf "e_version" (Obj.magic ehdr.Ehdr.e_version);
-              pfL "e_entry" ehdr.Ehdr.e_entry;
-              pfL "e_phoff" ehdr.Ehdr.e_phoff;
-              pfL "e_shoff" ehdr.Ehdr.e_shoff;
+              pfl "e_entry" ehdr.Ehdr.e_entry;
+              pfl "e_phoff" ehdr.Ehdr.e_phoff;
+              pfl "e_shoff" ehdr.Ehdr.e_shoff;
               pfl "e_flags" ehdr.Ehdr.e_flags;
               pf "e_ehsize" ehdr.Ehdr.e_ehsize;
               pf "e_phentsize" ehdr.Ehdr.e_phentsize;

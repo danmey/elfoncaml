@@ -1,11 +1,13 @@
 open Elf
 module Phdr = struct
+
   type native_t
+
   type t = {
     p_type : pt;
-    p_offset : off;
-    p_vaddr : addr;
-    p_paddr : addr;
+    p_offset : int32;
+    p_vaddr : int32;
+    p_paddr : int32;
     p_filesz : int;
     p_memsz : int;
     p_flags : int;
@@ -15,47 +17,54 @@ module Phdr = struct
 
   external create : native_t -> t = "caml_Elf32_Phdr_create"
   external update : t -> unit = "caml_Elf32_Phdr_update"
+
 end
 
+
 module Shdr = struct
+
   type native_t
+
   type t = {
-    sh_name		:word;
+    sh_name		:int32;
     sh_type		:sh_type;
     sh_flags		:sh_flags list;
-    sh_addr		:addr;
-    sh_offset		:off;
-    sh_size		:word;
-    sh_link		:word;
-    sh_info		:word;
-    sh_addralign	:word;
-    sh_entsize		:word;
+    sh_addr		:int32;
+    sh_offset		:int32;
+    sh_size		:int32;
+    sh_link		:int32;
+    sh_info		:int32;
+    sh_addralign	:int32;
+    sh_entsize		:int32;
     shdr                :native_t;
   }
 
   external create : native_t -> t = "caml_Elf32_Shdr_create"
   external update : t -> unit = "caml_Elf32_Shdr_update"
+
 end
 
 module Ehdr = struct
+
   type native_t
-type t = {
-  e_ident     : ident;
-  e_type      : type_;
-  e_machine   : machine;
-  e_version   : version;
-  e_entry     : addr;
-  e_phoff     : off;
-  e_shoff     : off;
-  e_flags     : word;
-  e_ehsize    : half;
-  e_phentsize : half;
-  e_phnum     : half;
-  e_shentsize : half;
-  e_shnum     : half;
-  e_shstrndx  : half;
-  ehdr: native_t;
-}
+
+  type t = {
+    e_ident     : ident;
+    e_type      : type_;
+    e_machine   : machine;
+    e_version   : version;
+    e_entry     : int32;
+    e_phoff     : int32;
+    e_shoff     : int32;
+    e_flags     : int32;
+    e_ehsize    : int;
+    e_phentsize : int;
+    e_phnum     : int;
+    e_shentsize : int;
+    e_shnum     : int;
+    e_shstrndx  : int;
+    ehdr: native_t;
+  }
 
 
   external create : native_t -> t = "caml_Elf32_Ehdr_create"
@@ -131,98 +140,10 @@ type t = {
       | ET_HIOS -> "ET_HIOS"
       | ET_LOPROC -> "ET_LOPROC"
       | ET_HIPROC -> "ET_HIPROC") ^ "\n"
-    ^ "Machine:\t" ^ (match e_machine with
-      | `M32 -> "AT&T WE 32100"
-      | `SPARC -> "SPARC"
-      | `I386 -> "Intel 80386"
-      | `M68K -> "Motorola 68000"
-      | `M88K -> "Motorola 88000"
-      | `I486 -> "Intel i486 (DO NOT USE THIS ONE)"
-      | `I860 -> "Intel 80860"
-      | `MIPS -> "MIPS I Architecture"
-      | `S370 -> "IBM System)370 Processor"
-      | `SPARC64 -> "SPARC 64-bit"
-      | `PARISC -> "Hewlett-Packard PA-RISC"
-      | `VPP500 -> "Fujitsu VPP500"
-      | `SPARC32PLUS -> "Enhanced instruction set SPARC"
-      | `I960 -> "Intel 80960"
-      | `PPC -> "PowerPC"
-      | `PPC64 -> "64-bit PowerPC"
-      | `S390 -> "IBM System)390 Processor"
-      | `V800 -> "NEC V800"
-      | `FR20 -> "Fujitsu FR20"
-      | `RH32 -> "TRW RH-32"
-      | `RCE -> "Motorola RCE"
-      | `ARM -> "Advanced RISC Machines ARM"
-      | `ALPHA -> "Digital Alpha"
-      | `SH -> "Hitachi SH"
-      | `SPARCV9 -> "SPARC Version 9"
-      | `TRICORE -> "Siemens TriCore embedded processor"
-      | `ARC -> "Argonaut RISC Core, Argonaut Technologies Inc."
-      | `H8 -> "Hitachi H8)300"
-      | `H8S -> "Hitachi H8S"
-      | `IA -> "Intel IA-64 processor architecture"
-      | `COLDFIRE -> "Motorola ColdFire"
-      | `M68HC12 -> "Motorola M68HC12"
-      | `MMA -> "Fujitsu MMA Multimedia Accelerator"
-      | `PCP -> "Siemens PCP"
-      | `NCPU -> "Sony nCPU embedded RISC processor"
-      | `NDR1 -> "Denso NDR1 microprocessor"
-      | `STARCORE -> "Motorola Star*Core processor"
-      | `ME16 -> "Toyota ME16 processor"
-      | `ST100 -> "STMicroelectronics ST100 processor"
-      | `TINYJ -> "Advanced Logic Corp. TinyJ embedded processor family"
-      | `X86 -> "AMD x86-64 architecture"
-      | `AMD64
-      | `PDSP -> "Sony DSP Processor"
-      | `FX66 -> "Siemens FX66 microcontroller"
-      | `ST9PLUS -> "STMicroelectronics ST9+ 8)16 bit microcontroller"
-      | `ST7 -> "STMicroelectronics ST7 8-bit microcontroller"
-      | `M68HC16 -> "Motorola MC68HC16 Microcontroller"
-      | `M68HC11 -> "Motorola MC68HC11 Microcontroller"
-      | `M68HC08 -> "Motorola MC68HC08 Microcontroller"
-      | `M68HC05 -> "Motorola MC68HC05 Microcontroller"
-      | `SVX -> "Silicon Graphics SVx"
-      | `ST19 -> "STMicroelectronics ST19 8-bit microcontroller"
-      | `VAX -> "Digital VAX"
-      | `CRIS -> "Axis Communications 32-bit embedded processor"
-      | `JAVELIN -> "Infineon Technologies 32-bit embedded processor"
-      | `FIREPATH -> "Element 14 64-bit DSP Processor"
-      | `ZSP -> "LSI Logic 16-bit DSP Processor"
-      | `MMIX -> "Donald Knuth's educational 64-bit processor"
-      | `HUANY -> "Harvard University machine-independent object files"
-      | `PRISM -> "SiTera Prism"
-      | `AVR -> "Atmel AVR 8-bit microcontroller"
-      | `FR30 -> "Fujitsu FR30"
-      | `D10V -> "Mitsubishi D10V"
-      | `D30V -> "Mitsubishi D30V"
-      | `V850 -> "NEC v850"
-      | `M32R -> "Mitsubishi M32R"
-      | `MN10300 -> "Matsushita MN10300"
-      | `MN10200 -> "Matsushita MN10200"
-      | `PJ -> "picoJava"
-      | `OPENRISC -> "OpenRISC 32-bit embedded processor"
-      | `XTENSA -> "Tensilica Xtensa Architecture"
-      | `VIDEOCORE -> "Alphamosaic VideoCore processor"
-      | `TMM -> "Thompson Multimedia General Purpose Processor"
-      | `NS32K -> "National Semiconductor 32000 series"
-      | `TPC -> "Tenor Network TPC processor"
-      | `SNP1K -> "Trebia SNP 1000 processor"
-      | `ST200 -> "STMicroelectronics (www.st.com) ST200 microcontroller"
-      | `IP2K -> "Ubicom IP2xxx microcontroller family"
-      | `MAX -> "MAX Processor"
-      | `CR -> "National Semiconductor CompactRISC microprocessor"
-      | `F2MC16 -> "Fujitsu F2MC16"
-      | `MSP430 -> "Texas Instruments embedded microcontroller msp430"
-      | `BLACKFIN -> "Analog Devices Blackfin (DSP) processor"
-      | `SE -> "S1C33 Family of Seiko Epson processors"
-      | `SEP -> "Sharp embedded microprocessor"
-      | `ARCA -> "Arca RISC Microprocessor"
-      | `UNICORE -> "Microprocessor series from PKU-Unity Ltd. and MPRC of Peking University"
-      | `NUM -> "NUM") ^ "\n"
-    ^ "Entry point address:\t" ^ f "0x%Lx" e_entry ^ "\n"
-    ^ "Start of program headers:\t" ^ Int64.to_string e_phoff ^ "\n"
-    ^ "Start of section headers:\t" ^ Int64.to_string e_shoff ^ "\n"
+    ^ "Machine:\t" ^ (string_of_machine e_machine) ^ "\n"
+    ^ "Entry point address:\t" ^ f "0x%lx" e_entry ^ "\n"
+    ^ "Start of program headers:\t" ^ Int32.to_string e_phoff ^ "\n"
+    ^ "Start of section headers:\t" ^ Int32.to_string e_shoff ^ "\n"
     ^ "Flags:\t" ^ Int32.to_string e_flags ^ "\n"
     ^ "Size of this header:\t" ^ string_of_int e_ehsize ^ "\n"
     ^ "Size of program headers:\t" ^ string_of_int e_phentsize ^ "\n"
@@ -230,6 +151,7 @@ type t = {
     ^ "Size of section headers:\t" ^ string_of_int e_shentsize ^ "\n"
     ^ "Number of section headers:\t" ^ string_of_int e_shnum ^ "\n"
     ^ "Section header string table index:\t" ^ string_of_int e_shstrndx ^ "\n"
+
 end
 
 external newehdr : t -> Ehdr.native_t = "caml_elf32_newehdr"
