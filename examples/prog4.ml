@@ -19,7 +19,7 @@ let _ =
                 | Elf.K_ELF -> begin
                   let ehdr = Ehdr.create (newehdr elf) in
                   print_endline (Ehdr.to_string ehdr);
-                  let idx = getshdrstrndx elf in
+                  let Some idx = getshdrstrndx elf in
                   match getscn elf idx with
                     | None -> err "elf_getscn() failed: %s."
                     | Some str_section -> begin

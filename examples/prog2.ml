@@ -55,8 +55,8 @@ let _ =
                 | n ->  begin 
                   pf "(shnum)" n;
                   match getshdrstrndx e with
-                    | -1 -> err "getshdrstrndx() failed: %s." (errmsg(-1));
-                    | n -> begin pf "(shstrndx)" n;
+                    | None -> err "getshdrstrndx() failed: %s." (errmsg(-1));
+                    | Some n -> begin pf "(shstrndx)" n;
                         match getphdrnum e with
                           | -1 -> err "getphdrnum() failed: %s." (errmsg(-1));
                           | n -> begin pf "(phnum)" n;
