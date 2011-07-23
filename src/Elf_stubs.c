@@ -14,6 +14,16 @@
 #include <stdio.h>
 #include <vis.h>
 
+#define Elf_Half_val Int_val
+#define Elf_Word_val Int32_val
+#define Elf_Addr_val Int32_val
+#define Elf_Off_val Int32_val
+
+#define Val_Elf_Half Val_int
+#define Val_Elf_Word copy_int32
+#define Val_Elf_Addr copy_int32
+#define Val_Elf_Off copy_int32
+
 static struct custom_operations elf_ops = {
   "org.danmey",
   custom_finalize_default,
@@ -223,6 +233,7 @@ ml_val (EI_ABIVERSION)
 /* ml_internal_fun1 (GElf_Shdr_option, gelf_getehdr, Elf_Scn); */
 
 #undef Val_copy_string
+
 
 CAMLprim value caml_elf_section_data_fill (value section, value bigarray) {
   CAMLparam2 (section, bigarray);
@@ -447,16 +458,16 @@ CAMLprim value caml_Elf32_Ehdr_update (value ehdr)
   READ_FIELD(e_type, ET_TAB);
   READ_FIELD(e_machine, variant_to_enum);
   READ_FIELD(e_version   , Int_val);
-  READ_FIELD(e_entry     , Int32_val);
-  READ_FIELD(e_phoff     , Int32_val);
-  READ_FIELD(e_shoff     , Int32_val);
-  READ_FIELD(e_flags     , Int32_val);
-  READ_FIELD(e_ehsize    , Int_val);
-  READ_FIELD(e_phentsize , Int_val);
-  READ_FIELD(e_phnum     , Int_val);
-  READ_FIELD(e_shentsize , Int_val);
-  READ_FIELD(e_shnum     , Int_val);
-  READ_FIELD(e_shstrndx  , Int_val);
+  READ_FIELD(e_entry     , Elf_Addr_val);
+  READ_FIELD(e_phoff     , Elf_Off_val);
+  READ_FIELD(e_shoff     , Elf_Off_val);
+  READ_FIELD(e_flags     , Elf_Word_val);
+  READ_FIELD(e_ehsize    , Elf_Half_val);
+  READ_FIELD(e_phentsize , Elf_Half_val);
+  READ_FIELD(e_phnum     , Elf_Half_val);
+  READ_FIELD(e_shentsize , Elf_Half_val);
+  READ_FIELD(e_shnum     , Elf_Half_val);
+  READ_FIELD(e_shstrndx  , Elf_Half_val);
   END_CAML_BLOCK ();
   CAMLreturn (Val_unit);
 }
@@ -487,16 +498,16 @@ CAMLprim value caml_Elf32_Ehdr_create (value elf32_ehdr)
   WRITE_FIELD (e_type, ET_TO_INT);
   WRITE_FIELD (e_machine, enum_to_variant);
   WRITE_FIELD (e_version, Val_int);
-  WRITE_FIELD (e_entry, copy_int32);
-  WRITE_FIELD (e_phoff, copy_int32);
-  WRITE_FIELD (e_shoff, copy_int32);
-  WRITE_FIELD (e_flags, copy_int32);
-  WRITE_FIELD (e_ehsize, Val_int);
-  WRITE_FIELD (e_phentsize, Val_int);
-  WRITE_FIELD (e_phnum, Val_int);
-  WRITE_FIELD (e_shentsize, Val_int);
-  WRITE_FIELD (e_shnum, Val_int);
-  WRITE_FIELD (e_shstrndx, Val_int);
+  WRITE_FIELD (e_entry, Val_Elf_Addr);
+  WRITE_FIELD (e_phoff, Val_Elf_Off);
+  WRITE_FIELD (e_shoff, Val_Elf_Off);
+  WRITE_FIELD (e_flags, Val_Elf_Word);
+  WRITE_FIELD (e_ehsize, Val_Elf_Half);
+  WRITE_FIELD (e_phentsize, Val_Elf_Half);
+  WRITE_FIELD (e_phnum, Val_Elf_Half);
+  WRITE_FIELD (e_shentsize, Val_Elf_Half);
+  WRITE_FIELD (e_shnum, Val_Elf_Half);
+  WRITE_FIELD (e_shstrndx, Val_Elf_Half);
   WRITE_FIELD_IM (elf32_ehdr, ID);
   END_CAML_BLOCK ();
   CAMLreturn (ehdr);

@@ -1,6 +1,17 @@
 open Elf
 
-module H = Elf_headers.Make (struct type t = int32 let to_string = Int32.to_string end)
+module H = Elf_headers.Make (struct
+  type word = int32
+  type off = int32
+  type addr = int32
+  type xword = int32
+  type half = int
+  type todo = int32
+  let string_of_addr = Int32.to_string
+  let string_of_off = Int32.to_string
+  let string_of_word = Int32.to_string
+  let string_of_half = string_of_int
+end)
 include H
 
 external newehdr : t -> Ehdr.native_t = "caml_elf32_newehdr"
