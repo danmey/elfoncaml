@@ -64,6 +64,7 @@ static struct custom_operations elf_ops = {
     return v; } \
   static inline value Val_##name(name* s) { return alloc_##name(s); }
 
+
 Struct(Elf)
 Struct(Elf_Scn)
 Struct(Elf32_Ehdr)
@@ -91,7 +92,9 @@ Struct(GElf_Shdr)
     return option;                                         \
   }
 
+
 #define Decl_Val_option(typ) Decl_Val_named_option(typ, alloc_##typ)
+
 
 Decl_Val_option (Elf)
 Decl_Val_option (Elf_Scn)
@@ -102,14 +105,10 @@ Decl_option_val (Elf)
 Decl_option_val (Elf_Scn)
 Decl_option_val (GElf_Shdr)
 
+
 #define string char
 Decl_Val_named_option (string, copy_string)
 #undef string
-
-#define ml_val(name)                                        \
-  CAMLprim value caml_val_##name () {                       \
-    CAMLparam0 ();                                          \
-    CAMLreturn (Val_int (name)); }
 
 #define ml_fun0(ret, name)                                  \
   CAMLprim value caml_##name () {                           \
@@ -231,7 +230,7 @@ ml_internal_fun1 (int, elf_getphdrnum, Elf)
 
 /* TODO: This should be removed along with vis.h header! */
 ml_internal_fun2 (String, vis, Int, Int)
-ml_val (EI_ABIVERSION)
+
 /* Shall we support Gelf, the only advantage I see here to handle
    uniformly architecture dependent bits */
 /* ml_internal_fun1 (GElf_Shdr_option, gelf_getshdr, Elf_Scn); */
@@ -520,29 +519,29 @@ unsigned long pt_to_int(int v)
 
 static unsigned long sht_tab[] =
   { SHT_NULL,
-  SHT_PROGBITS,
-  SHT_SYMTAB,
-  SHT_STRTAB,
-  SHT_RELA,
-  SHT_HASH,
-  SHT_DYNAMIC,
-  SHT_NOTE,
-  SHT_NOBITS,
-  SHT_REL,
-  SHT_SHLIB,
-  SHT_DYNSYM,
-  SHT_INIT_ARRAY,
-  SHT_FINI_ARRAY,
-  SHT_PREINIT_ARRAY,
-  SHT_GROUP,
-  SHT_SYMTAB_SHNDX,
-  SHT_NUM,
-  SHT_LOOS,
-  SHT_HIOS,
-  SHT_LOPROC,
-  SHT_HIPROC,
-  SHT_LOUSER,
-  SHT_HIUSER};
+    SHT_PROGBITS,
+    SHT_SYMTAB,
+    SHT_STRTAB,
+    SHT_RELA,
+    SHT_HASH,
+    SHT_DYNAMIC,
+    SHT_NOTE,
+    SHT_NOBITS,
+    SHT_REL,
+    SHT_SHLIB,
+    SHT_DYNSYM,
+    SHT_INIT_ARRAY,
+    SHT_FINI_ARRAY,
+    SHT_PREINIT_ARRAY,
+    SHT_GROUP,
+    SHT_SYMTAB_SHNDX,
+    SHT_NUM,
+    SHT_LOOS,
+    SHT_HIOS,
+    SHT_LOPROC,
+    SHT_HIPROC,
+    SHT_LOUSER,
+    SHT_HIUSER };
 
 unsigned long sht_to_int(unsigned long v)
 {
@@ -616,7 +615,6 @@ value int_to_mlflags (unsigned long flags)
   CAMLreturn (result);
 }
 
-
 CAMLprim value caml_Elf32_Phdr_update (value phdr)
 {
   CAMLparam1 (phdr);
@@ -657,7 +655,7 @@ CAMLprim value caml_Elf32_Phdr_create (value elf32_phdr)
 CAMLprim value caml_Elf32_Shdr_update (value shdr)
 {
   CAMLparam1 (shdr);
-  Elf32_Shdr* hdr = Elf32_Shdr_val(Field(shdr, 10));
+  Elf32_Shdr* hdr = Elf32_Shdr_val (Field(shdr, 10));
   hdr->sh_name      = Int32_val (Field (shdr, 0));
   hdr->sh_type      = sht_tab [Int_val (Field (shdr, 1))];
   hdr->sh_flags     = mlflags_to_int (Field (shdr, 2));
@@ -691,23 +689,13 @@ CAMLprim value caml_Elf32_Shdr_create (value elf32_shdr)
   CAMLreturn (shdr);
 }
 
-/* CAMLprim value caml_elf_elf32_getshdr (value section) */
-/* { */
-/*   CAMLparam1 (section); */
-/*   Elf32_Shdr* shdr = 0; */
-/*   if ( (shdr = elf32_getshdr (Elf_Scn_val (section))) == 0) */
-/*     elf_error ("elf_getshdr"); */
-/*   CAMLreturn (alloc_Elf32_Shdr (shdr)); */
-/* } */
-
-
 CAMLprim value caml_Elf_Data_update (value data)
 {
   CAMLparam1 (data);
   Elf_Data* hdr = Elf_Data_val(Field(data, 6));
 
   BEGIN_CAML_BLOCK (0, data);
-#define BA(x) (Is_block(x) ? Data_bigarray_val (Field(x,0)) : 0)
+#define BA(x) 0
   READ_FIELD (d_buf, BA);
 #undef BA
   READ_FIELD (d_type, Int_val);
@@ -716,6 +704,16 @@ CAMLprim value caml_Elf_Data_update (value data)
   READ_FIELD (d_align, Int32_val);
   READ_FIELD (d_version, Int_val);
   END_CAML_BLOCK ();
+  void* ptr = 0;
+  if (Is_block (Field(data,0)))
+    {
+      void* dst = malloc (hdr->d_size);
+      value option = Field(data,0);
+      value big_array = Field(option,0);
+      void* src = Data_bigarray_val (big_array);
+      memcpy (dst, src, hdr->d_size);
+      hdr->d_buf = dst;
+    }
   CAMLreturn (Val_unit);
 }
 
@@ -746,5 +744,3 @@ CAMLprim value caml_Elf_Data_create (value elf_data)
   END_CAML_BLOCK ();
   CAMLreturn (data);
 }
-
-

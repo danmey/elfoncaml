@@ -20,8 +20,10 @@
 include Elf_machine
 
 
-type scn
 type t
+
+type scn
+
 type version =
   | EV_NONE
   | EV_CURRENT
@@ -178,7 +180,9 @@ and flags =
   | F_LAYOUT
   | F_LAYOUT_OVERLAP
 
+
 module Data = struct
+
   type ('a,'b) t = {
     d_buf     : ('a, 'b, Bigarray.c_layout) Bigarray.Array1.t option;
     d_type    : dtype;
@@ -192,6 +196,7 @@ module Data = struct
   type native_t
   external create : native_t -> ('a, 'b) t = "caml_Elf_Data_create"
   external update : ('a, 'b) t -> unit = "caml_Elf_Data_update"
+
 end
 
 
@@ -206,6 +211,7 @@ external ndxscn : scn -> int = "caml_elf_ndxscn"
 external newscn : t -> scn option = "caml_elf_newscn"
 external update : t -> cmd -> int = "caml_elf_update"
 external flagphdr : t -> cmd -> int -> unit = "caml_elf_flagphdr"
+external flagelf :  t -> cmd -> int -> unit = "caml_elf_flagelf"
 external nextscn : t -> scn option -> scn option = "caml_elf_nextscn"
 external update_shstrndx : t -> int -> unit = "caml_elfx_update_shstrndx"
 external newdata  : scn -> Data.native_t = "caml_elf_newdata"
@@ -214,7 +220,6 @@ external getclass : t -> class_type = "caml_gelf_getclass"
 external getident : t -> string option = "caml_elf_getident"
 external getshdrnum : t -> int = "caml_elf_getshdrnum"
 external getphdrnum : t -> int = "caml_elf_getphdrnum"
-external update_shstrndx : t -> int -> unit = "caml_elfx_update_shstrndx"
 external vis : char -> int -> string = "caml_vis"
 
 
@@ -243,6 +248,7 @@ let rec sections elf =
 
 let offset_of_ei : ei -> int = Obj.magic
 let flagphdr elf cmd flag = flagphdr elf cmd (int_of_flag flag)
+let flagelf elf cmd flag = flagelf elf cmd (int_of_flag flag)
 let version v =  ev_of_int (version (int_of_ev v))
 let int_of_ei : ei -> int = Obj.magic
 
@@ -266,6 +272,7 @@ module Exceptions = struct
       | Some i -> i
       | None -> raise (Elf_error str)
 
+  let begins = l3 "begins" begins
   let getshdrstrndx = l1 "getshdrstrndx" getshdrstrndx
   let getscn = l2 "getscn" getscn
   let newscn = l1 "newscn" newscn

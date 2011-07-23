@@ -14,6 +14,7 @@ Library elfoncaml
   BuildTools:   ocamlbuild
   CSources:     Elf_stubs.c
   CCLib:        -lelf -lbsd
+  CCOpt:        -g
   BuildDepends: bigarray
   Modules:      Elf, Elf_headers, Elf_machine, Elf32
 
