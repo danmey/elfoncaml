@@ -17,7 +17,7 @@
   --------------------------------------------------------------------------*)
 
 
-include Arch_type
+include Elf_machine
 
 type scn
 type t

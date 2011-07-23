@@ -15,7 +15,7 @@ Library elfoncaml
   CSources:     Elf_stubs.c
   CCLib:        -lelf -lbsd
   BuildDepends: bigarray
-  Modules:      Elf, Elf_headers, Elf32, Arch_type
+  Modules:      Elf, Elf_headers, Elf_machine, Elf32
 
 Executable prog1
   Path:           examples  
