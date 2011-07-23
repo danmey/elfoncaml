@@ -1,7 +1,7 @@
 #                                                               -*-conf-*-
 OASISFormat: 0.2
 Name:        elfoncaml
-Version:     0.0.0
+Version:     0.1.0
 Synopsis:    OCaml libelf bindings
 Description:  Elfoncaml is a set of lowlevel bindings to libelf. The goal
   is to make manipulation of ELF compatible files possible from OCaml.
@@ -15,7 +15,7 @@ Library elfoncaml
   CSources:     Elf_stubs.c
   CCLib:        -lelf -lbsd
   BuildDepends: bigarray
-  Modules:      Elf
+  Modules:      Elf Elf32 Arch_type
 
 Executable prog1
   Path:           examples  
