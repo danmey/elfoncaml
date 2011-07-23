@@ -19,6 +19,7 @@
 
 include Elf_machine
 
+
 type scn
 type t
 type version =
@@ -193,6 +194,7 @@ module Data = struct
   external update : ('a, 'b) t -> unit = "caml_Elf_Data_update"
 end
 
+
 external version : int -> int = "caml_elf_version"
 external begins : Unix.file_descr -> cmd -> t option -> t option = "caml_elf_begin"
 external ends :  t -> unit = "caml_elf_end"
@@ -215,7 +217,7 @@ external getphdrnum : t -> int = "caml_elf_getphdrnum"
 external update_shstrndx : t -> int -> unit = "caml_elfx_update_shstrndx"
 external vis : char -> int -> string = "caml_vis"
 
-  
+
 let int_of_ev = function
   | `NONE -> 0
   | `CURRENT -> 1
@@ -232,12 +234,6 @@ let ev_of_int = function
   | 2 -> `NUM
   | _ -> failwith "ev_of_int: Wrong value"
 
-let offset_of_ei : ei -> int = Obj.magic
-
-let flagphdr elf cmd flag = flagphdr elf cmd (int_of_flag flag)
-let version v =  ev_of_int (version (int_of_ev v))
-let int_of_ei : ei -> int = Obj.magic
-
 let rec sections elf =
   let rec loop = function
     | None -> []
@@ -245,9 +241,36 @@ let rec sections elf =
   in
   loop (nextscn elf None)
 
-let ei_nident = 16
+let offset_of_ei : ei -> int = Obj.magic
+let flagphdr elf cmd flag = flagphdr elf cmd (int_of_flag flag)
+let version v =  ev_of_int (version (int_of_ev v))
+let int_of_ei : ei -> int = Obj.magic
 
-exception Elf_error of string * string
-let _ = Callback.register_exception "Elf.Elf_error" (Elf_error ("",""))
-let err x = failwith (Printf.fprintf stderr x (errmsg (-1)))
+exception Elf_error of string
 
+
+module Exceptions = struct
+
+  let l1 str f a =
+    match f a with
+      | Some i -> i
+      | None -> raise (Elf_error str)
+
+  let l2 str f a b =
+    match f a b with
+      | Some i -> i
+      | None -> raise (Elf_error str)
+
+  let l3 str f a b c =
+    match f a b c with
+      | Some i -> i
+      | None -> raise (Elf_error str)
+
+  let getshdrstrndx = l1 "getshdrstrndx" getshdrstrndx
+  let getscn = l2 "getscn" getscn
+  let newscn = l1 "newscn" newscn
+  let nextscn = l2 "nextscn" nextscn
+  let strptr = l3  "strptr" strptr
+  let getident = l1 "getident" getident
+
+end
