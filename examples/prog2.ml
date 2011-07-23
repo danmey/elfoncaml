@@ -1,4 +1,5 @@
 open Elf
+open Elf32
 
 let err f x = failwith (Printf.sprintf f x)
 let errx fmt_hdr fmt_rst a  = failwith (Printf.sprintf (fmt_hdr ^^ fmt_rst) a)
@@ -35,20 +36,20 @@ let _ =
                 Printf.printf " ['%s' %X]" bytes (int_of_char id.[i])
               done;
               print_endline "";
-              let ehdr = Elf32_Ehdr.create ehdr in
+              let ehdr = Ehdr.create ehdr in
               let pf v = Printf.printf "    %-20s 0x%x\n" v in
               let pfL v = Printf.printf "    %-20s 0x%Lx\n" v in
               let pfl v = Printf.printf "    %-20s 0x%lx\n" v in
-              pf "e_type" (Obj.magic ehdr.e_type);
-              pf "e_machine" (Obj.magic ehdr.e_machine);
-              pf "e_version" (Obj.magic ehdr.e_version);
-              pfL "e_entry" ehdr.e_entry;
-              pfL "e_phoff" ehdr.e_phoff;
-              pfL "e_shoff" ehdr.e_shoff;
-              pfl "e_flags" ehdr.e_flags;
-              pf "e_ehsize" ehdr.e_ehsize;
-              pf "e_phentsize" ehdr.e_phentsize;
-              pf "e_shentsize" ehdr.e_shentsize;
+              pf "e_type" (Obj.magic ehdr.Ehdr.e_type);
+              pf "e_machine" (Obj.magic ehdr.Ehdr.e_machine);
+              pf "e_version" (Obj.magic ehdr.Ehdr.e_version);
+              pfL "e_entry" ehdr.Ehdr.e_entry;
+              pfL "e_phoff" ehdr.Ehdr.e_phoff;
+              pfL "e_shoff" ehdr.Ehdr.e_shoff;
+              pfl "e_flags" ehdr.Ehdr.e_flags;
+              pf "e_ehsize" ehdr.Ehdr.e_ehsize;
+              pf "e_phentsize" ehdr.Ehdr.e_phentsize;
+              pf "e_shentsize" ehdr.Ehdr.e_shentsize;
 
               match getshdrnum e with
                 | -1 -> err "getshdrnum() failed: %s." (errmsg(-1))
