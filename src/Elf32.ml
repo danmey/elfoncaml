@@ -1,5 +1,5 @@
 (*----------------------------------------------------------------------------
-  elf32.ml - All the 32 bit libelf functionality
+  elf32.ml - All the 32 bit libelf functionality.
   Copyright (C) 2011 Wojciech Meyer
 
   This program is free software: you can redistribute it and/or modify
