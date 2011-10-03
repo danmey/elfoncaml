@@ -36,7 +36,7 @@ end)
 include H
 
 
-external newehdr : t -> Ehdr.native_t = "caml_elf32_newehdr"
+external newehdr : t -> Ehdr.native_t option = "caml_elf32_newehdr"
 external newphdr : t -> int -> Phdr.native_t = "caml_elf32_newphdr"
 external fsize : dtype -> int32 -> version -> int = "caml_elf32_fsize"
 external getehdr : t -> Ehdr.native_t option = "caml_elf32_getehdr"
@@ -50,7 +50,8 @@ module Exceptions = struct
       | Some i -> i
       | None -> raise (Elf_error str)
     
-  let getehdr = l1 "newehdr" getehdr
-  let getshdr = l1 "newshdr" getshdr
+  let newehdr = l1 "newehdr" newehdr
+  let getehdr = l1 "getehdr" getehdr
+  let getshdr = l1 "getshdr" getshdr
 
 end

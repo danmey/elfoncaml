@@ -12,9 +12,9 @@ let _ =
       | `NONE -> print_endline "ELF library initialization failed"
       | _ -> 
         begin 
-          let fd = Unix.openfile Sys.argv.(1) [Unix.O_WRONLY;Unix.O_CREAT;] 0o777 in
+          let fd = Unix.openfile Sys.argv.(1) [Unix.O_CREAT;Unix.O_WRONLY] 0o777 in
           let elf = begins fd C_WRITE None in
-          let ehdr = Elf32.newehdr elf in
+          let ehdr = newehdr elf in
           let ehdr = Elf32.Ehdr.create ehdr in
           
           Ehdr.update { ehdr with
@@ -38,7 +38,7 @@ let _ =
             Data.d_type = T_WORD;
             Data.d_size = 12l;
 (* TODO: Something here uterly broken. *)
-            (* Data.d_version = EV_CURRENT; *)
+            Data.d_version = EV_CURRENT;
 };
 
           let shdr = getshdr scn in
@@ -81,7 +81,7 @@ let _ =
 
           update_shstrndx elf (ndxscn scn);
 
-          print_int (update elf C_NULL);
+          update elf C_NULL;
 
           Phdr.update { phdr with
             Phdr.p_type = PT_PHDR;
@@ -90,7 +90,7 @@ let _ =
           };
 
           flagphdr elf C_SET F_DIRTY;
-          print_int(update elf C_WRITE);
+          update elf C_WRITE;
           ends elf;
           Unix.close fd;
           exit 0

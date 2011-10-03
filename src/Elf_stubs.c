@@ -218,7 +218,7 @@ ml_fun1 (Elf_Scn_option, elf_newscn, Elf)
 ml_fun2 (Elf_Scn_option, elf_nextscn, Elf, Elf_Scn_option)
 ml_fun2 (Unit, elfx_update_shstrndx, Elf, Int)
 ml_fun2 (Elf32_Phdr, elf32_newphdr, Elf, Int)
-ml_fun1 (Elf32_Ehdr, elf32_newehdr, Elf)
+ml_fun1 (Elf32_Ehdr_option, elf32_newehdr, Elf)
 ml_fun1 (Elf32_Ehdr_option, elf32_getehdr, Elf)
 ml_fun1 (Elf32_Shdr_option, elf32_getshdr, Elf_Scn)
 ml_fun3 (string_option, elf_strptr, Elf, Int, Int)
@@ -704,7 +704,6 @@ CAMLprim value caml_Elf_Data_update (value data)
   READ_FIELD (d_align, Int32_val);
   READ_FIELD (d_version, Int_val);
   END_CAML_BLOCK ();
-  void* ptr = 0;
   if (Is_block (Field(data,0)))
     {
       void* dst = malloc (hdr->d_size);

@@ -29,14 +29,19 @@ type version =
   | EV_CURRENT
   | EV_NUM
 and cmd =
-  | C_NULL
-  | C_READ
-  | C_WRITE
-  | C_CLR
-  | C_SET
-  | C_FDDONE
-  | C_FDREAD
-  | C_RDWR
+  | C_NULL			
+  | C_READ			
+  | C_RDWR			
+  | C_WRITE			
+  | C_CLR			
+  | C_SET			
+  | C_FDDONE			
+  | C_FDREAD			
+  | C_READ_MMAP		
+  | C_RDWR_MMAP		
+  | C_WRITE_MMAP		
+  | C_READ_MMAP_PRIVATE	
+  | C_EMPTY			
   | C_NUM
 and kind =
   | K_NONE
