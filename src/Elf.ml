@@ -31,17 +31,17 @@ type version =
 and cmd =
   | C_NULL			
   | C_READ			
-  | C_RDWR			
   | C_WRITE			
   | C_CLR			
   | C_SET			
   | C_FDDONE			
   | C_FDREAD			
-  | C_READ_MMAP		
-  | C_RDWR_MMAP		
-  | C_WRITE_MMAP		
-  | C_READ_MMAP_PRIVATE	
-  | C_EMPTY			
+  | C_RDWR			
+  (* | C_READ_MMAP		 *)
+  (* | C_RDWR_MMAP		 *)
+  (* | C_WRITE_MMAP		 *)
+  (* | C_READ_MMAP_PRIVATE	 *)
+  (* | C_EMPTY			 *)
   | C_NUM
 and kind =
   | K_NONE
@@ -209,6 +209,7 @@ external version : int -> int = "caml_elf_version"
 external begins : Unix.file_descr -> cmd -> t option -> t option = "caml_elf_begin"
 external ends :  t -> unit = "caml_elf_end"
 external errmsg : int -> string = "caml_elf_errmsg"
+external errno : unit -> int = "caml_elf_errno"
 external kind : t -> kind = "caml_elf_kind"
 external getshdrstrndx : t -> int option = "caml_elf_getshdrstrndx"
 external getscn : t -> int -> scn option = "caml_elf_getscn"
@@ -284,5 +285,4 @@ module Exceptions = struct
   let nextscn = l2 "nextscn" nextscn
   let strptr = l3  "strptr" strptr
   let getident = l1 "getident" getident
-
 end

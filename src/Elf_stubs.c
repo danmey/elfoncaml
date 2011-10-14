@@ -693,26 +693,12 @@ CAMLprim value caml_Elf_Data_update (value data)
 {
   CAMLparam1 (data);
   Elf_Data* hdr = Elf_Data_val(Field(data, 6));
-
-  BEGIN_CAML_BLOCK (0, data);
-#define BA(x) 0
-  READ_FIELD (d_buf, BA);
-#undef BA
-  READ_FIELD (d_type, Int_val);
-  READ_FIELD (d_size, Int32_val);
-  READ_FIELD (d_off, Int32_val);
-  READ_FIELD (d_align, Int32_val);
-  READ_FIELD (d_version, Int_val);
-  END_CAML_BLOCK ();
-  if (Is_block (Field(data,0)))
-    {
-      void* dst = malloc (hdr->d_size);
-      value option = Field(data,0);
-      value big_array = Field(option,0);
-      void* src = Data_bigarray_val (big_array);
-      memcpy (dst, src, hdr->d_size);
-      hdr->d_buf = dst;
-    }
+  hdr->d_buf      = 0;
+  hdr->d_type     = Int_val (Field (data, 1));
+  hdr->d_size     = Int32_val (Field (data, 2));
+  hdr->d_off      = Int32_val (Field (data, 3));
+  hdr->d_align    = Int32_val (Field (data, 4));
+  hdr->d_version  = Int_val (Field (data, 5));
   CAMLreturn (Val_unit);
 }
 

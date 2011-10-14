@@ -52,5 +52,5 @@ Executable prog5
 
 SourceRepository master
   Type:     git
-  Location: https://danmey@github.com/danmey/elfoncaml.git
+  Location: git://github.com/danmey/elfoncaml.git
   Browser:  https://github.com/danmey/elfoncaml

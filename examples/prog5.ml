@@ -12,7 +12,7 @@ let _ =
       | `NONE -> print_endline "ELF library initialization failed"
       | _ -> 
         begin 
-          let fd = Unix.openfile Sys.argv.(1) [Unix.O_CREAT;Unix.O_WRONLY] 0o777 in
+          let fd = Unix.openfile Sys.argv.(1) [Unix.O_CREAT] 0o777 in
           let elf = begins fd C_WRITE None in
           let ehdr = newehdr elf in
           let ehdr = Elf32.Ehdr.create ehdr in
@@ -31,15 +31,15 @@ let _ =
           let scn = newscn elf in
           let data = Data.create (newdata scn) in
           let b = (Bigarray.Array1.of_array Bigarray.int32 Bigarray.c_layout [|0x01234567l;0x89abcdefl;0xdeadc0del|]) in
-          Data.update { data  with
-            (* Data.d_align = 4l; *)
-            Data.d_off = 0l;
-            Data.d_buf = Some b;
-            Data.d_type = T_WORD;
-            Data.d_size = 12l;
-(* TODO: Something here uterly broken. *)
-            Data.d_version = EV_CURRENT;
-};
+(*           Data.update { data  with *)
+(*             (\* Data.d_align = 4l; *\) *)
+(*             Data.d_off = 0l; *)
+(*             Data.d_buf = Some b; *)
+(*             Data.d_type = T_WORD; *)
+(*             Data.d_size = 12l; *)
+(* (\* TODO: Something here uterly broken. *\) *)
+(*             Data.d_version = EV_CURRENT; *)
+(* }; *)
 
           let shdr = getshdr scn in
           let shdr = Shdr.create shdr in
