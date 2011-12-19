@@ -1,7 +1,7 @@
 open Elf
 open Elf.Exceptions
 open Elf64
-open Elf64.Exceptions
+
 
 let err x = failwith (Printf.sprintf x (Elf.errmsg (-1)))
 let _ =
@@ -17,16 +17,14 @@ let _ =
           let kind = kind elf in
           match kind with
             | Elf.K_ELF -> begin
-              let idx = getshdrstrndx elf in
-              let str_section = getscn elf idx in
+              let shstrndx = getshdrstrndx elf in
               let sections = sections elf in 
               List.iter 
                 (fun sec -> 
-                  let shdr = getshdr sec in
-                  let str_sec_idx = ndxscn str_section in
-                  let idx = ndxscn sec in
-                  let name = strptr elf str_sec_idx idx in
-                  Printf.printf "Section %-4.4d %s\n"  idx name) sections
+                  let Some shdr = getshdr sec in
+                  let shdr = Shdr.create shdr in
+                  let name = strptr elf shstrndx (Int64.to_int shdr.Shdr.sh_name) in
+                  Printf.printf "Section %-4.4d %s\n"  (ndxscn sec) name) sections
             end
             | _ -> print_endline "Uknown elf kind"
         end
