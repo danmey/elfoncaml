@@ -44,55 +44,55 @@ let _ =
           let shdr = getshdr scn in
           let shdr = Shdr.create shdr in
 
-          Shdr.update { shdr with
-            Shdr.sh_name = 1l;
-            Shdr.sh_type = SHT_HASH;
-            Shdr.sh_flags = [SHF_ALLOC];
-            Shdr.sh_entsize = 0l;
-          };
+          (* Shdr.update { shdr with *)
+          (*   Shdr.sh_name = 1l; *)
+          (*   Shdr.sh_type = SHT_HASH; *)
+          (*   Shdr.sh_flags = [SHF_ALLOC]; *)
+          (*   Shdr.sh_entsize = 0l; *)
+          (* }; *)
           
-          let c = int_of_char in
-          let scn = newscn elf in
-          let data = Data.create (newdata scn) in
-          Data.update { data with
-            Data.d_align = 1l;
-            Data.d_buf = Some (Bigarray.Array1.of_array Bigarray.int8_unsigned Bigarray.c_layout
-                            (Array.map c [|
-                              char_of_int 0;
-                              '.'; 'f'; 'o'; 'o'; char_of_int 0;
-                              '.'; 's'; 'h'; 's';'t'; char_of_int 0;
-                              'r'; 't'; 'a'; 'b'; char_of_int 0;
-                                         |]));
-            Data.d_off = 0l;
-            Data.d_size = 17l;
-            Data.d_type = T_BYTE;
-          (* TODO: Something here uterly broken. *)
-            Data.d_version = EV_CURRENT;
-          };
+          (* let c = int_of_char in *)
+          (* let scn = newscn elf in *)
+          (* let data = Data.create (newdata scn) in *)
+          (* Data.update { data with *)
+          (*   Data.d_align = 1l; *)
+          (*   Data.d_buf = Some (Bigarray.Array1.of_array Bigarray.int8_unsigned Bigarray.c_layout *)
+          (*                        (Array.map c [| *)
+          (*                          char_of_int 0; *)
+          (*                          '.'; 'f'; 'o'; 'o'; char_of_int 0; *)
+          (*                          '.'; 's'; 'h'; 's';'t'; char_of_int 0; *)
+          (*                          'r'; 't'; 'a'; 'b'; char_of_int 0; *)
+          (*                                     |])); *)
+          (*   Data.d_off = 0l; *)
+          (*   Data.d_size = 17l; *)
+          (*   Data.d_type = T_BYTE; *)
+          (*   (\* TODO: Something here uterly broken. *\) *)
+          (*   Data.d_version = EV_CURRENT; *)
+          (* }; *)
 
-          let shdr = getshdr scn in
-          let shdr = Shdr.create shdr in
-          Shdr.update { shdr with
-            Shdr.sh_name = 6l;
-            Shdr.sh_type = SHT_STRTAB;
-            sh_flags = [SHF_STRINGS;SHF_ALLOC];
-            Shdr.sh_entsize = 0l;
-          };
+          (* let shdr = getshdr scn in *)
+          (* let shdr = Shdr.create shdr in *)
+          (* Shdr.update { shdr with *)
+          (*   Shdr.sh_name = 6l; *)
+          (*   Shdr.sh_type = SHT_STRTAB; *)
+          (*   sh_flags = [SHF_STRINGS;SHF_ALLOC]; *)
+          (*   Shdr.sh_entsize = 0l; *)
+          (* }; *)
 
-          update_shstrndx elf (ndxscn scn);
+          (* update_shstrndx elf (ndxscn scn); *)
 
-          update elf C_NULL;
+          (* update elf C_NULL; *)
 
-          Phdr.update { phdr with
-            Phdr.p_type = PT_PHDR;
-            Phdr.p_offset = ehdr.Ehdr.e_phoff;
-            Phdr.p_filesz = fsize T_PHDR 1l EV_CURRENT;
-          };
+          (* Phdr.update { phdr with *)
+          (*   Phdr.p_type = PT_PHDR; *)
+          (*   Phdr.p_offset = ehdr.Ehdr.e_phoff; *)
+          (*   Phdr.p_filesz = fsize T_PHDR 1l EV_CURRENT; *)
+          (* }; *)
 
-          flagphdr elf C_SET F_DIRTY;
-          update elf C_WRITE;
-          ends elf;
-          Unix.close fd;
+          (* flagphdr elf C_SET F_DIRTY; *)
+          (* update elf C_WRITE; *)
+          (* ends elf; *)
+          (* Unix.close fd; *)
           exit 0
         end
           

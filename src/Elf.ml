@@ -189,7 +189,7 @@ and flags =
 module Data = struct
 
   type t = {
-    d_buf     : char array;
+    d_buf     : int array;
     d_type    : dtype;
     d_size    : int64;
     d_off     : int64;

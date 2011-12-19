@@ -27,7 +27,7 @@ let _ =
                   let name = strptr elf shstrndx (Int64.to_int shdr.Shdr.sh_name) in
                   let Some data = getdata sec in
                   let data = Data.create data in
-                  Array.iter print_char data.Data.d_buf;
+                  Array.iter print_int data.Data.d_buf;
                   Printf.printf "Section %-4.4d %s\n"  (ndxscn sec) name) sections
             end
             | _ -> print_endline "Uknown elf kind"
