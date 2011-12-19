@@ -93,6 +93,19 @@ module Make(T : TYPES) = struct
       | ELFOSABI_AROS -> "ELFOSABI_AROS"
       | ELFOSABI_ARM -> "ELFOSABI_ARM"
       | ELFOSABI_STANDALONE -> "ELFOSABI_STANDALONE"
+
+    let string_of_type = function
+      | ET_NONE -> "ET_NONE"
+      | ET_REL -> "ET_REL"
+      | ET_EXEC -> "ET_EXEC"
+      | ET_DYN -> "ET_DYN"
+      | ET_CORE -> "ET_CORE"
+      | ET_NUM -> "ET_NUM"
+      | ET_LOOS -> "ET_LOOS"
+      | ET_HIOS -> "ET_HIOS"
+      | ET_LOPROC -> "ET_LOPROC"
+      | ET_HIPROC -> "ET_HIPROC"
+
     let to_string
         { e_ident = {
           mag0;
@@ -121,8 +134,8 @@ module Make(T : TYPES) = struct
       "Magic:\t" ^ f "%2x %2x %2x %2x" (c mag0) (c mag1) (c mag2) (c mag3) ^ "\n"
       ^ "Class:\t" ^ (string_of_eclass eclass)  ^ "\n"
       ^ "Data:\t" ^ (string_of_adata adata)  ^ "\n"
-      ^ "Version:\t" ^ (string_of_version) ^ "\n"
-      ^ "OS/ABI:\t" ^ (string_of_osabi) ^ "\n"
+      ^ "Version:\t" ^ (string_of_version e_version) ^ "\n"
+      ^ "OS/ABI:\t" ^ (string_of_osabi osabi) ^ "\n"
       ^ "ABI Version:\t" ^ string_of_int abiversion ^ "\n"
       ^ "Type:\t" ^ (string_of_type e_type) ^ "\n"
       ^ "Machine:\t" ^ (string_of_machine e_machine) ^ "\n"
