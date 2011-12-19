@@ -844,3 +844,40 @@ CAMLprim value caml_Elf64_Ehdr_create (value elf64_ehdr)
   END_CAML_BLOCK ();
   CAMLreturn (ehdr);
 }
+
+CAMLprim value caml_Elf64_Phdr_update (value phdr)
+{
+  CAMLparam1 (phdr);
+  Elf32_Phdr* hdr = Elf32_Phdr_val(Field(phdr, 8));
+
+  BEGIN_CAML_BLOCK (0, phdr);
+#define PT_TAB(x) pt_tab[Int_val (x)]
+  READ_FIELD (p_type, PT_TAB);
+  READ_FIELD (p_offset, Elf_Addr_val);
+  READ_FIELD (p_vaddr , Elf_Addr_val);
+  READ_FIELD (p_paddr , Elf_Addr_val);
+  READ_FIELD (p_filesz, Int_val);
+  READ_FIELD (p_memsz , Int_val);
+  READ_FIELD (p_flags , Int_val);
+  READ_FIELD (p_align , Int_val);
+  END_CAML_BLOCK ();
+  CAMLreturn (Val_unit);
+}
+
+CAMLprim value caml_Elf64_Phdr_create (value elf32_phdr)
+{
+  CAMLparam1 (elf32_phdr);
+  CAMLlocal1 (phdr);
+  phdr = caml_alloc(9, 0);
+  Elf32_Phdr* hdr = Elf32_Phdr_val (elf32_phdr);
+  Field (phdr, 0) = Val_int (pt_to_int (hdr->p_type));
+  Field (phdr, 1) = Val_Elf_Addr (hdr->p_offset);
+  Field (phdr, 2) = Val_Elf_Addr (hdr->p_vaddr);
+  Field (phdr, 3) = Val_Elf_Addr (hdr->p_paddr);
+  Field (phdr, 4) = Val_int (hdr->p_filesz);
+  Field (phdr, 5) = Val_int (hdr->p_memsz);
+  Field (phdr, 6) = Val_int (hdr->p_flags);
+  Field (phdr, 7) = Val_int (hdr->p_align);
+  Field (phdr, 8) = elf32_phdr;
+  CAMLreturn (phdr);
+}

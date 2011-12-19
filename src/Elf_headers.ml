@@ -26,7 +26,8 @@ module type TYPES = sig
   val string_of_addr : addr -> string
   val string_of_off : off -> string
   val string_of_word : word -> string
-  val  string_of_half : half -> string
+  val string_of_half : half -> string
+      
 end
 
 module Make(T : TYPES) = struct
@@ -158,8 +159,8 @@ module Make(T : TYPES) = struct
       phdr: native_t;
     }
 
-    external create : native_t -> t = "caml_Elf32_Phdr_create"
-    external update : t -> unit = "caml_Elf32_Phdr_update"
+    external create : native_t -> t = "caml_Elf64_Phdr_create"
+    external update : t -> unit = "caml_Elf64_Phdr_update"
 
   end
 
@@ -182,8 +183,8 @@ module Make(T : TYPES) = struct
       shdr              :native_t;
     }
 
-    external create : native_t -> t = "caml_Elf32_Shdr_create"
-    external update : t -> unit = "caml_Elf32_Shdr_update"
+    external create : native_t -> t = "caml_Elf64_Shdr_create"
+    external update : t -> unit = "caml_Elf64_Shdr_update"
 
   end
 

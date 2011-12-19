@@ -1,7 +1,7 @@
 open Elf
 open Elf.Exceptions
-open Elf32
-open Elf32.Exceptions
+open Elf64
+open Elf64.Exceptions
 
 let err x = failwith (Printf.sprintf x (Elf.errmsg (-1)))
 let _ =
@@ -17,8 +17,6 @@ let _ =
           let kind = kind elf in
           match kind with
             | Elf.K_ELF -> begin
-              let ehdr = Ehdr.create (newehdr elf) in
-              print_endline (Ehdr.to_string ehdr);
               let idx = getshdrstrndx elf in
               let str_section = getscn elf idx in
               let sections = sections elf in 
