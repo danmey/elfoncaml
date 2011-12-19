@@ -732,19 +732,23 @@ value build_ba (void *x)
 CAMLprim value caml_Elf_Data_create (value elf_data)
 {
   CAMLparam1 (elf_data);
-  CAMLlocal1 (data);
+  CAMLlocal2 (data,array);
+  int i;
   Elf_Data* hdr = Elf_Data_val (elf_data);
+  array = caml_alloc_small(hdr->d_size, 0);
+  for (i=0; i < hdr->d_size; i++)
+    {
+      Field (array, i) = Val_int(((char*)hdr->d_buf)[i]);
+    }
+
   data = caml_alloc_small(7, 0);
-  BEGIN_CAML_BLOCK (0, data);
-#define BA(x) ((x) != 0 ? build_ba (x) : Val_int (0))
-  WRITE_FIELD (d_buf, BA);
-  WRITE_FIELD (d_type, Val_int);
-  WRITE_FIELD (d_size, copy_int32);
-  WRITE_FIELD (d_off, copy_int32);
-  WRITE_FIELD (d_align, copy_int32);
-  WRITE_FIELD (d_version, Val_int);
-  WRITE_FIELD_IM (elf_data, ID);
-  END_CAML_BLOCK ();
+  Field (data, 0) = array;
+  Field (data, 1) = Val_int(hdr->d_type);
+  Field (data, 2) = copy_int64(hdr->d_size);
+  Field (data, 3) = copy_int64(hdr->d_off);
+  Field (data, 4) = copy_int64(hdr->d_align);
+  Field (data, 5) = Val_int(hdr->d_version);
+  Field (data, 6) = elf_data;
   CAMLreturn (data);
 }
 

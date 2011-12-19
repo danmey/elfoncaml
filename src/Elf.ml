@@ -188,19 +188,19 @@ and flags =
 
 module Data = struct
 
-  type ('a,'b) t = {
-    d_buf     : ('a, 'b, Bigarray.c_layout) Bigarray.Array1.t option;
+  type t = {
+    d_buf     : char array;
     d_type    : dtype;
-    d_size    : int32;
-    d_off     : int32;
-    d_align   : int32;
+    d_size    : int64;
+    d_off     : int64;
+    d_align   : int64;
     d_version : version;
     data      : data_type;
   }
       
   type native_t
-  external create : native_t -> ('a, 'b) t = "caml_Elf_Data_create"
-  external update : ('a, 'b) t -> unit = "caml_Elf_Data_update"
+  external create : native_t -> t = "caml_Elf_Data_create"
+  external update : t -> unit = "caml_Elf_Data_update"
 
 end
 
