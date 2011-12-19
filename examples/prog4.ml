@@ -1,6 +1,7 @@
 open Elf
 open Elf.Exceptions
 open Elf64
+open Elf64.Exceptions
 
 
 let err x = failwith (Printf.sprintf x (Elf.errmsg (-1)))
@@ -21,7 +22,7 @@ let _ =
               let sections = sections elf in 
               List.iter 
                 (fun sec -> 
-                  let Some shdr = getshdr sec in
+                  let shdr = getshdr sec in
                   let shdr = Shdr.create shdr in
                   let name = strptr elf shstrndx (Int64.to_int shdr.Shdr.sh_name) in
                   let Some data = getdata sec in
