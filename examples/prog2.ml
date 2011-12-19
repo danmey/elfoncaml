@@ -1,5 +1,5 @@
 open Elf
-open Elf32
+open Elf64
 
 let err f x = failwith (Printf.sprintf f x)
 let errx fmt_hdr fmt_rst a  = failwith (Printf.sprintf (fmt_hdr ^^ fmt_rst) a)
@@ -16,7 +16,7 @@ let _ =
   match begins fd C_READ None with
     | None -> err "elf_begin() failed: %s." (errmsg (-1))
     | Some e -> begin
-      if kind e != K_ELF then
+      if kind e <> K_ELF then
         err "\"%s\" is not an ELF object." Sys.argv.(0);
       match getehdr e with
         | None -> err "getehdr() failed: %s." (errmsg (-1))
@@ -38,7 +38,7 @@ let _ =
               print_endline "";
               let ehdr = Ehdr.create ehdr in
               let pf v = Printf.printf "    %-20s 0x%x\n" v in
-              let pfl v = Printf.printf "    %-20s 0x%lx\n" v in
+              let pfl v = Printf.printf "    %-20s 0x%Lx\n" v in
               pf "e_type" (Obj.magic ehdr.Ehdr.e_type);
               pf "e_machine" (Obj.magic ehdr.Ehdr.e_machine);
               pf "e_version" (Obj.magic ehdr.Ehdr.e_version);
@@ -49,19 +49,19 @@ let _ =
               pf "e_ehsize" ehdr.Ehdr.e_ehsize;
               pf "e_phentsize" ehdr.Ehdr.e_phentsize;
               pf "e_shentsize" ehdr.Ehdr.e_shentsize;
-
               match getshdrnum e with
                 | -1 -> err "getshdrnum() failed: %s." (errmsg(-1))
-                | n ->  begin 
+                | n ->  begin
                   pf "(shnum)" n;
                   match getshdrstrndx e with
                     | None -> err "getshdrstrndx() failed: %s." (errmsg(-1));
                     | Some n -> begin pf "(shstrndx)" n;
-                        (* match getphdrnum e with *)
-                        (*   | -1 -> err "getphdrnum() failed: %s." (errmsg(-1)); *)
-                        (*   | n -> begin pf "(phnum)" n; *)
-                            ends e;
-                            Unix.close fd
+                      match getphdr e with
+                        | None -> err "getphdrnum() failed: %s." (errmsg(-1));
+                        | Some _ -> begin 
+                          ends e;
+                          Unix.close fd
+                        end
                     end
                 end
             end

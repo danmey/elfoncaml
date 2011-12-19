@@ -41,6 +41,7 @@ external newphdr : t -> int -> Phdr.native_t = "caml_elf64_newphdr"
 external fsize : dtype -> int64 -> version -> int = "caml_elf64_fsize"
 external getehdr : t -> Ehdr.native_t option = "caml_elf64_getehdr"
 external getshdr : scn -> Shdr.native_t option = "caml_elf64_getshdr"
+external getphdr : t -> Phdr.native_t option = "caml_elf64_getphdr"
 
 
 module Exceptions = struct

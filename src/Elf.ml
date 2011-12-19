@@ -226,7 +226,6 @@ external strptr : t -> int -> int -> string option = "caml_elf_strptr"
 external getclass : t -> class_type = "caml_gelf_getclass"
 external getident : t -> string option = "caml_elf_getident"
 external getshdrnum : t -> int = "caml_elf_getshdrnum"
-(* external getphdrnum : t -> int = "caml_elf_getphdrnum" *)
 external vis : char -> int -> string = "caml_vis"
 
 let int_of_ev = function

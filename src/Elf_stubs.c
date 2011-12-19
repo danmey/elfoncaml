@@ -105,12 +105,16 @@ Decl_Val_option (Elf_Data)
 Decl_Val_option (GElf_Shdr)
 Decl_Val_option (Elf32_Shdr)
 Decl_Val_option (Elf32_Ehdr)
+Decl_Val_option (Elf32_Phdr)
 Decl_Val_option (Elf64_Shdr)
 Decl_Val_option (Elf64_Ehdr)
+Decl_Val_option (Elf64_Phdr)
 Decl_option_val (Elf)
 Decl_option_val (Elf_Scn)
 Decl_option_val (Elf_Data)
 Decl_option_val (GElf_Shdr)
+Decl_option_val (Elf32_Phdr)
+Decl_option_val (Elf64_Phdr)
 
 
 #define string char
@@ -153,7 +157,7 @@ Decl_Val_named_option (string, copy_string)
     CAMLreturn (Val_ ## ret (caml_internal_##name (arg1##_val (_a1), arg2##_val (_a2), arg3##_val (_a3)))); }
 
 
-CAMLprim int caml_elf_getshdrstrndx_internal (Elf* elf) {
+CAMLprim value caml_elf_getshdrstrndx_internal (Elf* elf) {
   size_t shstrndx;
   value option = Val_int (0);
   if (elf_getshdrstrndx (elf, &shstrndx) == -1)
@@ -190,13 +194,6 @@ CAMLprim Elf_Data* caml_elf_getdata_internal (Elf_Scn* elf_scn) {
   return elf_getdata (elf_scn, NULL);
 }
 
-/* CAMLprim int caml_elf_getphdrnum_internal (Elf* elf) { */
-/*   size_t num; */
-/*   if (elf_getphdrnum (elf, &num) == 0) */
-/*     return -1; */
-/*   return num; */
-/* } */
-
 /* TODO: This should be removed along with vis.h header! */
 CAMLprim char* caml_vis_internal (int a, int b) {
   char* str = malloc (256);
@@ -225,27 +222,31 @@ ml_fun3 (Unit, elf_flagphdr, Elf, Int, Int)
 ml_fun3 (int, elf_flagscn , Elf_Scn, Int, Int)
 ml_fun3 (int, elf_flagshdr, Elf_Scn, Int, Int)
 ml_fun3 (int, elf32_fsize, Int, Int32, Int)
+ml_fun3 (int, elf64_fsize, Int, Int64, Int)
 ml_fun2 (int, elf_update, Elf, Int)
 ml_fun1 (Elf_Scn_option, elf_newscn, Elf)
 ml_fun2 (Elf_Scn_option, elf_nextscn, Elf, Elf_Scn_option)
 ml_fun2 (Unit, elfx_update_shstrndx, Elf, Int)
 ml_fun2 (Elf32_Phdr, elf32_newphdr, Elf, Int)
+ml_fun2 (Elf64_Phdr, elf64_newphdr, Elf, Int)
 ml_fun1 (Elf32_Ehdr_option, elf32_newehdr, Elf)
+ml_fun1 (Elf64_Ehdr_option, elf64_newehdr, Elf)
 ml_fun1 (Elf32_Ehdr_option, elf32_getehdr, Elf)
 ml_fun1 (Elf32_Shdr_option, elf32_getshdr, Elf_Scn)
+ml_fun1 (Elf32_Phdr_option, elf32_getphdr, Elf)
+ml_fun1 (Elf64_Phdr_option, elf64_getphdr, Elf)
 ml_fun3 (string_option, elf_strptr, Elf, Int, Int)
 ml_fun1 (int, gelf_getclass, Elf)
 ml_internal_fun1 (string_option, elf_getident, Elf)
 ml_internal_fun1 (Handled, elf_getshdrstrndx, Elf)
 ml_internal_fun1 (int, elf_getshdrnum, Elf)
 ml_fun1 (Elf64_Ehdr_option, elf64_getehdr, Elf)
-ml_fun1 (Elf64_Shdr_option, elf64_getshdr, Elf)
+ml_fun1 (Elf64_Shdr_option, elf64_getshdr, Elf_Scn)
 ml_internal_fun1 (Elf_Data_option, elf_getdata, Elf_Scn);
 
 /* Get uninterpreted section content.  */
 extern Elf_Data *elf_rawdata (Elf_Scn *__scn, Elf_Data *__data);
 
-//ml_internal_fun1 (int, elf_getphdrnum, Elf)
 
 /* TODO: This should be removed along with vis.h header! */
 ml_internal_fun2 (String, vis, Int, Int)
