@@ -57,12 +57,11 @@ let _ =
                   match getshdrstrndx e with
                     | None -> err "getshdrstrndx() failed: %s." (errmsg(-1));
                     | Some n -> begin pf "(shstrndx)" n;
-                        match getphdrnum e with
-                          | -1 -> err "getphdrnum() failed: %s." (errmsg(-1));
-                          | n -> begin pf "(phnum)" n;
+                        (* match getphdrnum e with *)
+                        (*   | -1 -> err "getphdrnum() failed: %s." (errmsg(-1)); *)
+                        (*   | n -> begin pf "(phnum)" n; *)
                             ends e;
                             Unix.close fd
-                          end
                     end
                 end
             end

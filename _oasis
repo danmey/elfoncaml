@@ -16,7 +16,7 @@ Library elfoncaml
   CCLib:        -lelf -lbsd
   CCOpt:        -g
   BuildDepends: bigarray
-  Modules:      Elf, Elf_headers, Elf_machine, Elf32
+  Modules:      Elf, Elf_headers, Elf_machine, Elf32, Elf64
 
 Executable prog1
   Path:           examples  

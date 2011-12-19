@@ -72,6 +72,9 @@ Struct(Elf32_Phdr)
 Struct(Elf32_Shdr)
 Struct(Elf_Data)
 Struct(GElf_Shdr)
+Struct(Elf64_Ehdr)
+Struct(Elf64_Phdr)
+Struct(Elf64_Shdr)
 
 
 #define Decl_option_val(name)                            \
@@ -98,11 +101,15 @@ Struct(GElf_Shdr)
 
 Decl_Val_option (Elf)
 Decl_Val_option (Elf_Scn)
+Decl_Val_option (Elf_Data)
 Decl_Val_option (GElf_Shdr)
 Decl_Val_option (Elf32_Shdr)
 Decl_Val_option (Elf32_Ehdr)
+Decl_Val_option (Elf64_Shdr)
+Decl_Val_option (Elf64_Ehdr)
 Decl_option_val (Elf)
 Decl_option_val (Elf_Scn)
+Decl_option_val (Elf_Data)
 Decl_option_val (GElf_Shdr)
 
 
@@ -173,17 +180,22 @@ CAMLprim char* caml_elf_getident_internal (Elf* elf) {
 /* TODO: Should be factored in macro */
 CAMLprim int caml_elf_getshdrnum_internal (Elf* elf) {
   size_t num;
-  if (elf_getshdrnum (elf, &num) == 0)
+  if (elf_getshdrnum (elf, &num) != 0)
     return -1;
   return num;
 }
 
-CAMLprim int caml_elf_getphdrnum_internal (Elf* elf) {
-  size_t num;
-  if (elf_getphdrnum (elf, &num) == 0)
-    return -1;
-  return num;
+/* TODO: Should be factored in macro */
+CAMLprim Elf_Data* caml_elf_getdata_internal (Elf_Scn* elf_scn) {
+  return elf_getdata (elf_scn, NULL);
 }
+
+/* CAMLprim int caml_elf_getphdrnum_internal (Elf* elf) { */
+/*   size_t num; */
+/*   if (elf_getphdrnum (elf, &num) == 0) */
+/*     return -1; */
+/*   return num; */
+/* } */
 
 /* TODO: This should be removed along with vis.h header! */
 CAMLprim char* caml_vis_internal (int a, int b) {
@@ -226,7 +238,14 @@ ml_fun1 (int, gelf_getclass, Elf)
 ml_internal_fun1 (string_option, elf_getident, Elf)
 ml_internal_fun1 (Handled, elf_getshdrstrndx, Elf)
 ml_internal_fun1 (int, elf_getshdrnum, Elf)
-ml_internal_fun1 (int, elf_getphdrnum, Elf)
+ml_fun1 (Elf64_Ehdr_option, elf64_getehdr, Elf)
+ml_fun1 (Elf64_Shdr_option, elf64_getshdr, Elf)
+ml_internal_fun1 (Elf_Data_option, elf_getdata, Elf_Scn);
+
+/* Get uninterpreted section content.  */
+extern Elf_Data *elf_rawdata (Elf_Scn *__scn, Elf_Data *__data);
+
+//ml_internal_fun1 (int, elf_getphdrnum, Elf)
 
 /* TODO: This should be removed along with vis.h header! */
 ml_internal_fun2 (String, vis, Int, Int)
@@ -374,8 +393,7 @@ static unsigned int variant_to_enum (value hash)
         if (variants[i].hash == hash)
           return variants[i].constant;
   }
-  failwith ("variant_to_enum: Wrong variant.");
-  return 0;
+  return variants[0].constant;
 }
 
 static value enum_to_variant (unsigned int en)
@@ -387,8 +405,7 @@ static value enum_to_variant (unsigned int en)
        i++)
     if (variants[i].constant == en)
       return variants[i].hash;
-  failwith ("enum_to_variant: Wrong enum.");
-  return 0;
+  return variants[0].hash;
 }
 
 static int et_tab[] =
@@ -728,4 +745,101 @@ CAMLprim value caml_Elf_Data_create (value elf_data)
   WRITE_FIELD_IM (elf_data, ID);
   END_CAML_BLOCK ();
   CAMLreturn (data);
+}
+
+
+#undef Elf_Half_val
+#undef Elf_Word_val
+#undef Elf_Addr_val
+#undef Elf_Off_val
+
+#undef Val_Elf_Half
+#undef Val_Elf_Word
+#undef Val_Elf_Addr
+#undef Val_Elf_Off
+
+#define Elf_Half_val Int_val
+#define Elf_Word_val Int64_val
+#define Elf_Addr_val Int64_val
+#define Elf_Off_val Int64_val
+
+#define Val_Elf_Half Val_int
+#define Val_Elf_Word copy_int64
+#define Val_Elf_Addr copy_int64
+#define Val_Elf_Off copy_int64
+
+CAMLprim value caml_Elf64_Ehdr_update (value ehdr)
+{
+  CAMLparam1 (ehdr);
+  CAMLlocal1 (e_ident);
+  Elf32_Ehdr* hdr = Elf32_Ehdr_val(Field(ehdr, 14));
+  e_ident = Field (ehdr, 0);
+  BEGIN_CAML_BLOCK (0, e_ident);
+  READ_FIELD (e_ident[_field], Int_val);
+  READ_FIELD (e_ident[_field], Int_val);
+  READ_FIELD (e_ident[_field], Int_val);
+  READ_FIELD (e_ident[_field], Int_val);
+  READ_FIELD (e_ident[_field], Int_val);
+  READ_FIELD (e_ident[_field], Int_val);
+  READ_FIELD (e_ident[_field], Int_val);
+  READ_FIELD (e_ident[_field], Int_val);
+  END_CAML_BLOCK ();
+#define ET_TAB(what) et_tab[Int_val (what)]
+  BEGIN_CAML_BLOCK (1, ehdr);
+  READ_FIELD(e_type, ET_TAB);
+  READ_FIELD(e_machine, variant_to_enum);
+  READ_FIELD(e_version   , Int_val);
+  READ_FIELD(e_entry     , Elf_Addr_val);
+  READ_FIELD(e_phoff     , Elf_Off_val);
+  READ_FIELD(e_shoff     , Elf_Off_val);
+  READ_FIELD(e_flags     , Elf_Word_val);
+  READ_FIELD(e_ehsize    , Elf_Half_val);
+  READ_FIELD(e_phentsize , Elf_Half_val);
+  READ_FIELD(e_phnum     , Elf_Half_val);
+  READ_FIELD(e_shentsize , Elf_Half_val);
+  READ_FIELD(e_shnum     , Elf_Half_val);
+  READ_FIELD(e_shstrndx  , Elf_Half_val);
+  END_CAML_BLOCK ();
+  CAMLreturn (Val_unit);
+}
+
+CAMLprim value caml_Elf64_Ehdr_create (value elf64_ehdr)
+{
+  CAMLparam1 (elf64_ehdr);
+  CAMLlocal2 (e_ident, ehdr);
+  Elf32_Ehdr* hdr = Elf32_Ehdr_val (elf64_ehdr);
+
+  e_ident = caml_alloc(8, 0);
+
+  BEGIN_CAML_BLOCK (0, e_ident);
+  WRITE_FIELD (e_ident[_field], Val_int);
+  WRITE_FIELD (e_ident[_field], Val_int);
+  WRITE_FIELD (e_ident[_field], Val_int);
+  WRITE_FIELD (e_ident[_field], Val_int);
+  WRITE_FIELD (e_ident[_field], Val_int);
+  WRITE_FIELD (e_ident[_field], Val_int);
+  WRITE_FIELD (e_ident[_field], Val_int);
+  WRITE_FIELD (e_ident[_field], Val_int);
+  END_CAML_BLOCK ();
+  ehdr = caml_alloc(15, 0);
+#define ET_TO_INT(x) Val_int (et_to_int (x))
+#define ID(x) x
+  BEGIN_CAML_BLOCK (0, ehdr);
+  WRITE_FIELD_IM (e_ident, ID);
+  WRITE_FIELD (e_type, ET_TO_INT);
+  WRITE_FIELD (e_machine, enum_to_variant);
+  WRITE_FIELD (e_version, Val_int);
+  WRITE_FIELD (e_entry, Val_Elf_Addr);
+  WRITE_FIELD (e_phoff, Val_Elf_Off);
+  WRITE_FIELD (e_shoff, Val_Elf_Off);
+  WRITE_FIELD (e_flags, Val_Elf_Word);
+  WRITE_FIELD (e_ehsize, Val_Elf_Half);
+  WRITE_FIELD (e_phentsize, Val_Elf_Half);
+  WRITE_FIELD (e_phnum, Val_Elf_Half);
+  WRITE_FIELD (e_shentsize, Val_Elf_Half);
+  WRITE_FIELD (e_shnum, Val_Elf_Half);
+  WRITE_FIELD (e_shstrndx, Val_Elf_Half);
+  WRITE_FIELD_IM (elf64_ehdr, ID);
+  END_CAML_BLOCK ();
+  CAMLreturn (ehdr);
 }

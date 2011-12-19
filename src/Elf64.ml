@@ -36,11 +36,11 @@ end)
 include H
 
 
-external newehdr : t -> Ehdr.native_t option = "caml_elf32_newehdr"
-external newphdr : t -> int -> Phdr.native_t = "caml_elf32_newphdr"
-external fsize : dtype -> int64 -> version -> int = "caml_elf32_fsize"
-external getehdr : t -> Ehdr.native_t option = "caml_elf32_getehdr"
-external getshdr : scn -> Shdr.native_t option = "caml_elf32_getshdr"
+external newehdr : t -> Ehdr.native_t option = "caml_elf64_newehdr"
+external newphdr : t -> int -> Phdr.native_t = "caml_elf64_newphdr"
+external fsize : dtype -> int64 -> version -> int = "caml_elf64_fsize"
+external getehdr : t -> Ehdr.native_t option = "caml_elf64_getehdr"
+external getshdr : scn -> Shdr.native_t option = "caml_elf64_getshdr"
 
 
 module Exceptions = struct

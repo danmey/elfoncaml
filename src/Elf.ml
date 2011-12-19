@@ -221,13 +221,13 @@ external flagelf :  t -> cmd -> int -> unit = "caml_elf_flagelf"
 external nextscn : t -> scn option -> scn option = "caml_elf_nextscn"
 external update_shstrndx : t -> int -> unit = "caml_elfx_update_shstrndx"
 external newdata  : scn -> Data.native_t = "caml_elf_newdata"
+external getdata : scn -> Data.native_t option = "caml_elf_getdata"
 external strptr : t -> int -> int -> string option = "caml_elf_strptr"
 external getclass : t -> class_type = "caml_gelf_getclass"
 external getident : t -> string option = "caml_elf_getident"
 external getshdrnum : t -> int = "caml_elf_getshdrnum"
-external getphdrnum : t -> int = "caml_elf_getphdrnum"
+(* external getphdrnum : t -> int = "caml_elf_getphdrnum" *)
 external vis : char -> int -> string = "caml_vis"
-
 
 let int_of_ev = function
   | `NONE -> 0
