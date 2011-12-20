@@ -615,19 +615,18 @@ value int_to_mlflags (unsigned long flags)
   if (flags == 0)
     result = Val_int (0);
   else {
-    result = alloc_small (2,0);
+    list = caml_alloc (2,0);
+    Store_field (list, 0, Val_int (0));
+    Store_field (list, 1, Val_int (0));
     for (i=0; i < sizeof(shf_tab)/sizeof(shf_tab[0]); i++) {
       if (shf_tab[i] & flags) {
-        Field (list, 0) = Val_int (i);
-        if (i == sizeof(shf_tab)/sizeof(shf_tab[0]) - 1) {
-          Field (list, 1) = Val_int (0);
-        }
-        else
-          {
-            Field (list, 1) = alloc_small (2,0);
-            list = Field (list, 1);
-          }
+        Store_field (list, 1, caml_alloc (2,0));
+        list = Field (list, 1);
+        Store_field (list, 0, Val_int (i));
+        Store_field (list, 1, Val_int (0));
       }
+      if (i == 0)
+        result = list;
     }
   }
   CAMLreturn (result);
@@ -735,13 +734,13 @@ CAMLprim value caml_Elf_Data_create (value elf_data)
   CAMLlocal2 (data,array);
   int i;
   Elf_Data* hdr = Elf_Data_val (elf_data);
-  array = caml_alloc_small(hdr->d_size, 0);
+  array = caml_alloc(hdr->d_size, 0);
   for (i=0; i < hdr->d_size; i++)
     {
-      Field (array, i) = Val_int(((char*)hdr->d_buf)[i]);
+      Field (array, i) = Val_int(((unsigned char*)hdr->d_buf)[i]);
     }
 
-  data = caml_alloc_small(7, 0);
+  data = caml_alloc(7, 0);
   Field (data, 0) = array;
   Field (data, 1) = Val_int(hdr->d_type);
   Field (data, 2) = copy_int64(hdr->d_size);
@@ -872,17 +871,17 @@ CAMLprim value caml_Elf64_Shdr_create (value elf64_shdr)
   CAMLlocal1 (shdr);
   shdr = caml_alloc(11, 0);
   Elf64_Shdr* hdr = Elf64_Shdr_val (elf64_shdr);
-  Field (shdr, 0) = copy_int64 (hdr->sh_name);
-  Field (shdr, 1) = Val_int (sht_to_int (hdr->sh_type));
-  /* Field (shdr, 2) = int_to_mlflags (hdr->sh_flags); */
-  Field (shdr, 3) = copy_int64 (hdr->sh_addr);
-  Field (shdr, 4) = copy_int64 (hdr->sh_offset);
-  Field (shdr, 5) = copy_int64 (hdr->sh_size);
-  Field (shdr, 6) = copy_int64 (hdr->sh_link);
-  Field (shdr, 7) = copy_int64 (hdr->sh_info);
-  Field (shdr, 8) = copy_int64 (hdr->sh_addralign);
-  Field (shdr, 9) = copy_int64 (hdr->sh_entsize);
-  Field (shdr, 10) = elf64_shdr;
+  Store_field (shdr, 0, copy_int64 (hdr->sh_name));
+  Store_field (shdr, 1, Val_int (sht_to_int (hdr->sh_type)));
+  Store_field (shdr, 2, int_to_mlflags (hdr->sh_flags));
+  Store_field (shdr, 3, copy_int64 (hdr->sh_addr));
+  Store_field (shdr, 4, copy_int64 (hdr->sh_offset));
+  Store_field (shdr, 5, copy_int64 (hdr->sh_size));
+  Store_field (shdr, 6, copy_int64 (hdr->sh_link));
+  Store_field (shdr, 7, copy_int64 (hdr->sh_info));
+  Store_field (shdr, 8, copy_int64 (hdr->sh_addralign));
+  Store_field (shdr, 9, copy_int64 (hdr->sh_entsize));
+  Store_field (shdr, 10, elf64_shdr);
   CAMLreturn (shdr);
 }
 
@@ -912,14 +911,14 @@ CAMLprim value caml_Elf64_Phdr_create (value elf64_phdr)
   CAMLlocal1 (phdr);
   phdr = caml_alloc(9, 0);
   Elf64_Phdr* hdr = Elf64_Phdr_val (elf64_phdr);
-  Field (phdr, 0) = Val_int (pt_to_int (hdr->p_type));
-  Field (phdr, 1) = copy_int64 (hdr->p_offset);
-  Field (phdr, 2) = copy_int64 (hdr->p_vaddr);
-  Field (phdr, 3) = copy_int64 (hdr->p_paddr);
-  Field (phdr, 4) = Val_int (hdr->p_filesz);
-  Field (phdr, 5) = Val_int (hdr->p_memsz);
-  Field (phdr, 6) = Val_int (hdr->p_flags);
-  Field (phdr, 7) = Val_int (hdr->p_align);
-  Field (phdr, 8) = elf64_phdr;
+  Store_field (phdr, 0, Val_int (pt_to_int (hdr->p_type)));
+  Store_field (phdr, 1, copy_int64 (hdr->p_offset));
+  Store_field (phdr, 2, copy_int64 (hdr->p_vaddr));
+  Store_field (phdr, 3, copy_int64 (hdr->p_paddr));
+  Store_field (phdr, 4, Val_int (hdr->p_filesz));
+  Store_field (phdr, 5, Val_int (hdr->p_memsz));
+  Store_field (phdr, 6, Val_int (hdr->p_flags));
+  Store_field (phdr, 7, Val_int (hdr->p_align));
+  Store_field (phdr, 8, elf64_phdr);
   CAMLreturn (phdr);
 }
