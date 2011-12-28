@@ -922,3 +922,41 @@ CAMLprim value caml_Elf64_Phdr_create (value elf64_phdr)
   Store_field (phdr, 8, elf64_phdr);
   CAMLreturn (phdr);
 }
+
+void print_symbols(Elf_Scn *scn)
+{
+}
+
+
+CAMLprim value caml_Sym_create (value elf_scn)
+{
+  CAMLparam1 (elf_scn);
+  CAMLlocal2 (sym,array);
+  int count;
+  Elf_Scn* scn = 0;
+  Elf_Data* data = 0;
+
+  scn = Elf_Scn_val (elf_scn);
+  if ((data = elf_getdata(scn, data)) == 0 || data->d_size == 0)
+      return caml_alloc (0,0);
+
+  Elf64_Sym *esym = (Elf64_Sym*) data->d_buf;
+  Elf64_Sym *lastsym = (Elf64_Sym*) ((char*) data->d_buf + data->d_size);
+
+  array = caml_alloc (lastsym-esym,0);
+  count = 0;
+  for (esym = (Elf64_Sym*) data->d_buf; esym < lastsym; esym++){
+    sym = caml_alloc(6, 0);
+    Store_field (sym, 0, copy_int64 (esym->st_name));
+    Store_field (sym, 3, Val_int (esym->st_info));
+    Store_field (sym, 4, Val_int (esym->st_other));
+    Store_field (sym, 5, copy_int64 (esym->st_shndx));
+    Store_field (sym, 1, copy_int64 (esym->st_value));
+    Store_field (sym, 2, copy_int64 (esym->st_size));
+    Store_field (array, count, sym);
+    count++;
+  }
+
+  CAMLreturn (array);
+}
+

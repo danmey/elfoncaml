@@ -204,6 +204,20 @@ module Data = struct
 
 end
 
+module Sym = struct
+
+  type sym =
+      { st_name:Int64.t;
+        st_info:char;
+        st_other:char;
+        st_shndx:Int64.t;
+        st_value:Int64.t;
+        st_size:Int64.t;
+      }
+  and t = sym array
+
+  external create : scn -> t = "caml_Sym_create"
+end
 
 external version : int -> int = "caml_elf_version"
 external begins : Unix.file_descr -> cmd -> t option -> t option = "caml_elf_begin"
