@@ -948,11 +948,11 @@ CAMLprim value caml_Sym_create (value elf_scn)
   for (esym = (Elf64_Sym*) data->d_buf; esym < lastsym; esym++){
     sym = caml_alloc(6, 0);
     Store_field (sym, 0, copy_int64 (esym->st_name));
-    Store_field (sym, 3, Val_int (esym->st_info));
-    Store_field (sym, 4, Val_int (esym->st_other));
-    Store_field (sym, 5, copy_int64 (esym->st_shndx));
-    Store_field (sym, 1, copy_int64 (esym->st_value));
-    Store_field (sym, 2, copy_int64 (esym->st_size));
+    Store_field (sym, 1, Val_int (esym->st_info));
+    Store_field (sym, 2, Val_int (esym->st_other));
+    Store_field (sym, 3, copy_int64 (esym->st_shndx));
+    Store_field (sym, 4, copy_int64 (esym->st_value));
+    Store_field (sym, 5, copy_int64 (esym->st_size));
     Store_field (array, count, sym);
     count++;
   }
