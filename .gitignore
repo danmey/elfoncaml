@@ -11,9 +11,9 @@
 /_tags
 /myocamlbuild.ml
 /setup.ml
-/META
 /AUTHORS.txt
 /INSTALL.txt
 /README.txt
+META
 *.mllib
 *.clib
