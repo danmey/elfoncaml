@@ -4,7 +4,7 @@ Name:        elfoncaml
 Version:     0.1.0
 Synopsis:    OCaml libelf bindings
 Description: Elfoncaml is a set of lowlevel bindings to libelf. The goal
-  is to make manipulation of ELF compatible files possible from OCaml.
+  is to make reading of ELF compatible files possible from OCaml.
 Authors:     Wojciech Meyer
 License:     BSD3
 Plugins:     META (0.2), StdFiles (0.2)
