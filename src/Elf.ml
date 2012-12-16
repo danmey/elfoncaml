@@ -1,21 +1,35 @@
-(*----------------------------------------------------------------------------
-  elf.ml - Main module for libelf bindings.
-  Copyright (C) 2011 Wojciech Meyer
+(*---------------------------------------------------------------------------
+  Copyright (c) 2012 Wojciech Meyer
+  All rights reserved.
 
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU Lesser General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are
+  met:
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU Lesser General Public License for more details.
+  1. Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
 
-  You should have received a copy of the GNU Lesser General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  --------------------------------------------------------------------------*)
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the
+     distribution.
 
+  3. Neither the name of Wojciech Meyer nor the names of
+     contributors may be used to endorse or promote products derived
+     from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  ---------------------------------------------------------------------------*)
 
 include Elf_machine
 
@@ -29,14 +43,14 @@ type version =
   | EV_CURRENT
   | EV_NUM
 and cmd =
-  | C_NULL			
-  | C_READ			
-  | C_WRITE			
-  | C_CLR			
-  | C_SET			
-  | C_FDDONE			
-  | C_FDREAD			
-  | C_RDWR			
+  | C_NULL
+  | C_READ
+  | C_WRITE
+  | C_CLR
+  | C_SET
+  | C_FDDONE
+  | C_FDREAD
+  | C_RDWR
   (* | C_READ_MMAP		 *)
   (* | C_RDWR_MMAP		 *)
   (* | C_WRITE_MMAP		 *)
@@ -197,7 +211,7 @@ module Data = struct
     d_version : version;
     data      : data_type;
   }
-      
+
   type native_t
   external create : native_t -> t = "caml_Elf_Data_create"
   external update : t -> unit = "caml_Elf_Data_update"
@@ -251,7 +265,7 @@ let int_of_flag = function
   | F_DIRTY -> 0x1
   | F_LAYOUT -> 0x4
   | F_LAYOUT_OVERLAP -> 0x10000000
-    
+
 let ev_of_int = function
   | 0 -> `NONE
   | 1 -> `CURRENT
@@ -299,23 +313,3 @@ module Exceptions = struct
   let strptr = l3  "strptr" strptr
   let getident = l1 "getident" getident
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

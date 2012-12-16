@@ -3,10 +3,10 @@ OASISFormat: 0.2
 Name:        elfoncaml
 Version:     0.1.0
 Synopsis:    OCaml libelf bindings
-Description:  Elfoncaml is a set of lowlevel bindings to libelf. The goal
+Description: Elfoncaml is a set of lowlevel bindings to libelf. The goal
   is to make manipulation of ELF compatible files possible from OCaml.
 Authors:     Wojciech Meyer
-License:     LGPL
+License:     BSD3
 Plugins:     META (0.2), StdFiles (0.2)
 
 Library elfoncaml
@@ -19,7 +19,7 @@ Library elfoncaml
   Modules:      Elf, Elf_headers, Elf_machine, Elf32, Elf64
 
 Executable prog1
-  Path:           examples  
+  Path:           examples
   MainIs:         prog1.ml
   CompiledObject: best
   BuildDepends:   elfoncaml, unix
@@ -27,7 +27,7 @@ Executable prog1
   Install:        false
 
 Executable prog2
-  Path:           examples  
+  Path:           examples
   MainIs:         prog2.ml
   CompiledObject: best
   BuildDepends:   elfoncaml, unix
@@ -35,16 +35,8 @@ Executable prog2
   Install:        false
 
 Executable prog4
-  Path:           examples  
+  Path:           examples
   MainIs:         prog4.ml
-  CompiledObject: best
-  BuildDepends:   elfoncaml, unix
-  BuildTools:     ocamlbuild
-  Install:        false
-
-Executable prog5
-  Path:           examples  
-  MainIs:         prog5.ml
   CompiledObject: best
   BuildDepends:   elfoncaml, unix
   BuildTools:     ocamlbuild
