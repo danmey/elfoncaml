@@ -157,6 +157,12 @@ and sh_type =
     | SHT_SYMTAB_SHNDX
     | SHT_NUM
     | SHT_LOOS
+    | SHT_SUNW_move
+    | SHT_SUNW_COMDAT
+    | SHT_SUNW_syminfo
+    | SHT_GNU_verdef
+    | SHT_GNU_verneed
+    | SHT_GNU_versym
     | SHT_HIOS
     | SHT_LOPROC
     | SHT_HIPROC

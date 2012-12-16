@@ -1,5 +1,5 @@
 open Elf
-open Elf64
+open Elf32
 
 let err f x = failwith (Printf.sprintf f x)
 let errx fmt_hdr fmt_rst a  = failwith (Printf.sprintf (fmt_hdr ^^ fmt_rst) a)
@@ -7,7 +7,7 @@ let errx fmt_hdr fmt_rst a  = failwith (Printf.sprintf (fmt_hdr ^^ fmt_rst) a)
 let _ =
   begin if Array.length Sys.argv != 2 then
     err "usage: %s file-name" Sys.argv.(0) end;
-  
+
   begin if version `CURRENT == `NONE then
     errx "ELF library initialization " "failed: %s" (errmsg (-1)) end;
 
@@ -38,7 +38,7 @@ let _ =
               print_endline "";
               let ehdr = Ehdr.create ehdr in
               let pf v = Printf.printf "    %-20s 0x%x\n" v in
-              let pfl v = Printf.printf "    %-20s 0x%Lx\n" v in
+              let pfl v = Printf.printf "    %-20s 0x%lx\n" v in
               pf "e_type" (Obj.magic ehdr.Ehdr.e_type);
               pf "e_machine" (Obj.magic ehdr.Ehdr.e_machine);
               pf "e_version" (Obj.magic ehdr.Ehdr.e_version);
@@ -58,7 +58,7 @@ let _ =
                     | Some n -> begin pf "(shstrndx)" n;
                       match getphdr e with
                         | None -> err "getphdrnum() failed: %s." (errmsg(-1));
-                        | Some _ -> begin 
+                        | Some _ -> begin
                           ends e;
                           Unix.close fd
                         end
@@ -67,4 +67,3 @@ let _ =
             end
         end
     end
-

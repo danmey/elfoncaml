@@ -1,7 +1,7 @@
 open Elf
 open Elf.Exceptions
-open Elf64
-open Elf64.Exceptions
+open Elf32
+open Elf32.Exceptions
 
 
 let err x = failwith (Printf.sprintf x (Elf.errmsg (-1)))
@@ -24,7 +24,7 @@ let _ =
                 (fun sec ->
                   let shdr = getshdr sec in
                   let shdr = Shdr.create shdr in
-                  let name = strptr elf shstrndx (Int64.to_int shdr.Shdr.sh_name) in
+                  let name = strptr elf shstrndx (Int32.to_int shdr.Shdr.sh_name) in
                   match getdata sec with
                   | Some data ->
                       let data = Data.create data in
@@ -32,8 +32,6 @@ let _ =
                       Printf.printf "Section %-4.4d %s\n"  (ndxscn sec) name
                   | None -> err "getdata failed: %s"
                 ) sections
-
-
             end
             | _ -> print_endline "Uknown elf kind"
         end

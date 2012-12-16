@@ -569,11 +569,25 @@ static unsigned long sht_tab[] =
     SHT_SYMTAB_SHNDX,
     SHT_NUM,
     SHT_LOOS,
+    SHT_GNU_ATTRIBUTES,
+    SHT_GNU_HASH,
+    SHT_GNU_LIBLIST,
+    SHT_CHECKSUM,
+    SHT_LOSUNW,
+    SHT_SUNW_move,
+    SHT_SUNW_COMDAT,
+    SHT_SUNW_syminfo,
+    SHT_GNU_verdef,
+    SHT_GNU_verneed,
+    SHT_GNU_versym,
+    SHT_HISUNW,
     SHT_HIOS,
     SHT_LOPROC,
     SHT_HIPROC,
     SHT_LOUSER,
-    SHT_HIUSER };
+    SHT_HIUSER
+
+ };
 
 unsigned long sht_to_int(unsigned long v)
 {
